@@ -1,0 +1,112 @@
+{
+    "name": "漂泊者",
+    "attribute": "衍射",
+    "weapon_type": "迅刀",
+    "attack": 375,
+    "defense": 1368,
+    "health": 11400,
+
+    "crit_rate": {
+        "value": 5,
+        "_description": ""
+    },
+
+    "crit_damage": {
+        "value": 150,
+        "_description": ""
+    },
+
+    "efficiency": {
+        "value": 100,
+        "_description": ""
+    },
+
+    "attack_rate": {
+        "value": 27,
+        "_description": "技能边路加攻12%，技能中路2：重击鸣奏后加攻15%"
+    },
+
+    "attribute_damage_enhancement": {
+        "value": 12,
+        "_description": "技能边路增伤12%"
+    },
+
+    "general_damage_enhancement": {
+        "value": 0,
+        "_description": ""
+    },
+
+    "heavy_damage_enhancement": {
+        "value": 0,
+        "_description": ""
+    },
+
+    "skill_damage_enhancement": {
+        "value": 60,
+        "_description": "技能中路1增伤60%"
+    },
+
+    "ending_damage_enhancement": {
+        "value": 0,
+        "_description": ""
+    },
+
+    "star": [
+        {
+            "num": 1,
+            "key": "crit_rate",
+            "value": 15,
+            "_description": "技能后爆率提升15%"
+        },
+        {
+            "num": 2,
+            "key": "attribute_damage_enhancement",
+            "value": 20,
+            "_description": ""
+        },
+        {
+            "num": 3,
+            "key": "efficiency",
+            "value": 20,
+            "_description": ""
+        },
+        {
+            "num": 4,
+            "key": "",
+            "value": 0,
+            "_description": ""
+        },
+        {
+            "num": 5,
+            "key": "ending_damage_enhancement",
+            "value": 40,
+            "_description": ""
+        },
+        {
+            "num": 6,
+            "key": "",
+            "value": 0,
+            "_description": ""
+        }
+    ],
+
+    "rate": {
+        "normal_1": 59.15,
+        "normal_2": 76.05,
+        "normal_3": 76.05,
+        "normal_4": 130.13,
+        "heavy": 96.35,
+        "mingzou": 76.05,
+        "yuyin": 126.75,
+        "space": 104.78,
+        "skill": 236.19,
+        "xuanyin": 258.16,
+        "xuanyinfeilun": 39.77,
+        "huisheng1": 79.53,
+        "huisheng2": 159.05,
+        "ending": 874.77,
+        "bianzou": 168.99
+    },
+
+    "sp": "鸣链6：技能或大招使目标降低10%抗性"
+}

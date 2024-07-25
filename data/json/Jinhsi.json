@@ -1,0 +1,116 @@
+{
+    "name": "今汐",
+    "attribute": "衍射",
+    "weapon_type": "长刃",
+    "attack": 412,
+    "defense": 1258,
+    "health": 10825,
+
+    "crit_rate": {
+        "value": 13,
+        "_description": "技能边路加暴8%"
+    },
+
+    "crit_damage": {
+        "value": 150,
+        "_description": ""
+    },
+
+    "efficiency": {
+        "value": 100,
+        "_description": ""
+    },
+
+    "attack_rate": {
+        "value": 12,
+        "_description": "技能边路加攻12%"
+    },
+
+    "attribute_damage_enhancement": {
+        "value": 20,
+        "_description": "技能中路1增伤20%"
+    },
+
+    "general_damage_enhancement": {
+        "value": 0,
+        "_description": ""
+    },
+
+    "heavy_damage_enhancement": {
+        "value": 0,
+        "_description": ""
+    },
+
+    "skill_damage_enhancement": {
+        "value": 0,
+        "_description": ""
+    },
+
+    "ending_damage_enhancement": {
+        "value": 0,
+        "_description": ""
+    },
+
+    "star": [
+        {
+            "num": 1,
+            "key": "skill_damage_enhancement",
+            "value": 80,
+            "_description": "今汐施放普攻凌霄·普攻、共鸣技能逐天取月时，获得一层惊蛰效果，可叠加4层，持续6秒。施放共鸣技能惊龙破空时，消耗惊蛰效果的所有层数，每消耗一层，共鸣技能惊龙破空造成的伤害提升20%。"
+        },
+        {
+            "num": 2,
+            "key": "",
+            "value": 0,
+            "_description": "今汐处于非战斗状态大于4秒时，回复40点【韶光】，每4秒只生效1次。"
+        },
+        {
+            "num": 3,
+            "key": "attack_rate",
+            "value": 50,
+            "_description": "今汐施放变奏技能蟠龙清辉后，立刻获得12点【韶光】，获得一层谪仙效果，每层使攻击提升25%，可叠加2层，效果持续20秒。"
+        },
+        {
+            "num": 4,
+            "key": "attribute_damage_enhancement",
+            "value": 20,
+            "_description": "今汐施放共鸣解放移岁诛邪或共鸣技能惊龙破空时，附近队伍中所有角色全属性伤害加成提升20%，持续20秒。"
+        },
+        {
+            "num": 5,
+            "key": "rate_ending",
+            "value": 0,
+            "_description": "共鸣解放移岁诛邪伤害倍率提升120%。"
+        },
+        {
+            "num": 6,
+            "key": "rate_jinglongpokong",
+            "value1": 45,
+            "value2": 71,
+            "_description": "共鸣技能惊龙破空伤害倍率提升45%，消耗【韶光】时带来的倍率增加效果额外提升71%。"
+        }
+    ],
+
+    "rate": {
+        "normal_1": 66.47,
+        "normal_2": 97.49,
+        "normal_3": 106.49,
+        "normal_4": 157.72,
+        "heavy": 238.6,
+        "space": 123.28,
+        "skill": 155.68,
+        "shennifeimang": 197.29,
+        "lingxiao_1": 88.62,
+        "lingxiao_2": 129.95,
+        "lingxiao_3": 165.74,
+        "lingxiao_4": 186.69,
+        "lingxiao_heavy": 159.06,
+        "zhutianquyue": 503.8,
+        "jinglongpokong_yiri": 119.34,
+        "jinglongpokong_bingxing": 347.92,
+        "ending": 1666.03,
+        "bianzou": 209.05
+    },
+
+    "sp": "每点韶光增加炳星倍率26.84%，技能中路2变奏倍率提升50%（已计入）"
+}
