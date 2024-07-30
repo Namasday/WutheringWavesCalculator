@@ -71,14 +71,42 @@ class Ui_Form(object):
         self.btnChara_3.setIcon(icon3)
         self.btnChara_3.setIconSize(QtCore.QSize(91, 182))
         self.btnChara_3.setObjectName("btnChara_3")
-        self.frameStrategy = QtWidgets.QFrame(parent=self.tabHeZhou)
-        self.frameStrategy.setGeometry(QtCore.QRect(310, 39, 911, 671))
-        self.frameStrategy.setStyleSheet("border: 2px solid #ffffff; /* 设置边框和颜色 */\n"
+        self.widgetStrategy = QtWidgets.QWidget(parent=self.tabHeZhou)
+        self.widgetStrategy.setGeometry(QtCore.QRect(310, 39, 911, 671))
+        self.widgetStrategy.setStyleSheet("border: 2px solid #ffffff; /* 设置边框和颜色 */\n"
 "border-radius: 20px; /* 设置圆角半径 */\n"
 "background-color: rgb(20, 20, 20);")
-        self.frameStrategy.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        self.frameStrategy.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
-        self.frameStrategy.setObjectName("frameStrategy")
+        self.widgetStrategy.setObjectName("widgetStrategy")
+        self.widgetcc = QtWidgets.QWidget(parent=self.widgetStrategy)
+        self.widgetcc.setGeometry(QtCore.QRect(30, 140, 111, 71))
+        self.widgetcc.setStyleSheet("border: 2px solid #ffffff; /* 设置边框和颜色 */\n"
+"border-radius: 20px; /* 设置圆角半径 */\n"
+"background-color: rgb(100, 86, 0);")
+        self.widgetcc.setObjectName("widgetcc")
+        self.pushButton_2 = QtWidgets.QPushButton(parent=self.widgetcc)
+        self.pushButton_2.setGeometry(QtCore.QRect(10, 20, 30, 30))
+        self.pushButton_2.setStyleSheet("color: rgb(255, 255, 255);\n"
+"background-color: rgb(50, 50, 50);")
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.lineEdit_1 = QtWidgets.QLineEdit(parent=self.widgetcc)
+        self.lineEdit_1.setGeometry(QtCore.QRect(50, 10, 51, 21))
+        font = QtGui.QFont()
+        font.setFamily("宋体")
+        font.setPointSize(10)
+        self.lineEdit_1.setFont(font)
+        self.lineEdit_1.setStyleSheet("color: rgb(255, 255, 255);\n"
+"background-color: rgb(50, 50, 50);")
+        self.lineEdit_1.setObjectName("lineEdit_1")
+        self.lineEdit_2 = QtWidgets.QLineEdit(parent=self.widgetcc)
+        self.lineEdit_2.setGeometry(QtCore.QRect(50, 40, 51, 21))
+        font = QtGui.QFont()
+        font.setFamily("宋体")
+        font.setPointSize(10)
+        self.lineEdit_2.setFont(font)
+        self.lineEdit_2.setStyleSheet("color: rgb(255, 255, 255);\n"
+"background-color: rgb(50, 50, 50);")
+        self.lineEdit_2.setText("")
+        self.lineEdit_2.setObjectName("lineEdit_2")
         self.preset = QtWidgets.QComboBox(parent=self.tabHeZhou)
         self.preset.setGeometry(QtCore.QRect(360, 0, 231, 31))
         font = QtGui.QFont()
@@ -452,6 +480,8 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "鸣潮声骸计算器"))
+        self.pushButton_2.setText(_translate("Form", "C1"))
+        self.lineEdit_1.setText(_translate("Form", "1.8"))
         self.preset.setCurrentText(_translate("Form", "无（使用前请保存你的策略）"))
         self.preset.setItemText(0, _translate("Form", "无（使用前请保存你的策略）"))
         self.preset.setItemText(1, _translate("Form", "安可>散华>维里奈"))

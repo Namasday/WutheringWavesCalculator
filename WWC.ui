@@ -163,27 +163,6 @@
       </size>
      </property>
     </widget>
-    <widget class="QFrame" name="frameStrategy">
-     <property name="geometry">
-      <rect>
-       <x>310</x>
-       <y>39</y>
-       <width>911</width>
-       <height>671</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 2px solid #ffffff; /* 设置边框和颜色 */
-border-radius: 20px; /* 设置圆角半径 */
-background-color: rgb(20, 20, 20);</string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
     <widget class="QComboBox" name="preset">
      <property name="geometry">
       <rect>
@@ -348,6 +327,24 @@ background-color: rgb(20, 20, 20);</string>
      </property>
      <property name="text">
       <string>&gt;&gt;</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelStrategy">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>39</y>
+       <width>911</width>
+       <height>671</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 2px solid #ffffff; /* 设置边框和颜色 */
+border-radius: 20px; /* 设置圆角半径 */
+background-color: rgb(20, 20, 20);</string>
+     </property>
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </widget>
@@ -1163,10 +1160,49 @@ border-color: transparent;</string>
     </widget>
    </widget>
   </widget>
+  <widget class="QPushButton" name="btnMiniMainWindow">
+   <property name="geometry">
+    <rect>
+     <x>1220</x>
+     <y>0</y>
+     <width>30</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>imgs/ico/mini.png</normaloff>imgs/ico/mini.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>25</width>
+     <height>25</height>
+    </size>
+   </property>
+  </widget>
   <zorder>frametab</zorder>
   <zorder>tab</zorder>
   <zorder>btnDestroyMainWindow</zorder>
+  <zorder>btnMiniMainWindow</zorder>
  </widget>
+ <tabstops>
+  <tabstop>btnHeZhou</tabstop>
+  <tabstop>btnCalcu</tabstop>
+  <tabstop>btnChara_1</tabstop>
+  <tabstop>btnChara_2</tabstop>
+  <tabstop>btnChara_3</tabstop>
+  <tabstop>btnSaveStrategy</tabstop>
+  <tabstop>btnCC_1</tabstop>
+  <tabstop>btnCC_2</tabstop>
+  <tabstop>btnCC_3</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>btnChara</tabstop>
+  <tabstop>btnDestroyMainWindow</tabstop>
+  <tabstop>btnMiniMainWindow</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

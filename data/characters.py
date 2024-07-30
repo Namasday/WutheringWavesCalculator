@@ -1,6 +1,7 @@
 import os, json
 
-chara_path = 'data/json/'  # 人物json文件路径
+chara_dict_path = 'data/json/'  # 人物json文件路径
+chara_list_path = 'imgs/chara'  # 人物图片路径
 
 
 class Characters:
@@ -27,8 +28,7 @@ class Characters:
 class PiaoBoZheYanShe(Characters):
     """指定人物"""
     def __init__(self):
-        global chara_path
-        with open(chara_path + "PiaoBoZheYanShe.json", 'r', encoding='utf-8') as file:
+        with open(chara_dict_path + "PiaoBoZheYanShe.json", 'r', encoding='utf-8') as file:
             chara = json.load(file)
         super().__init__(chara)
 
@@ -40,8 +40,7 @@ class PiaoBoZheYanShe(Characters):
 class Jinhsi(Characters):
     """指定人物"""
     def __init__(self):
-        global chara_path
-        with open(chara_path + "Jinhsi.json", 'r', encoding='utf-8') as file:
+        with open(chara_dict_path + "Jinhsi.json", 'r', encoding='utf-8') as file:
             chara = json.load(file)
         super().__init__(chara)
 
@@ -60,9 +59,7 @@ def find(dictionary, value):
     return None  # 如果找不到匹配的值，返回None
 
 
-"""通过字符串寻找类"""
-
-
+# 通过字符串寻找类
 def create_instance_by_name(class_name):
     cls = globals().get(class_name)
     if cls is not None and isinstance(cls, type):
@@ -72,5 +69,9 @@ def create_instance_by_name(class_name):
 
 
 chara_dict = {}
-for filename in os.listdir(chara_path):
+for filename in os.listdir(chara_dict_path):
     chara_dict[filename[:-5]] = create_instance_by_name(filename[:-5])
+
+chara_list = []
+for filename in os.listdir(chara_list_path):
+    chara_list.append(filename[:-4])
