@@ -1,13 +1,14 @@
+import json
 import os
 import sys
 
-from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QWidget, QVBoxLayout, QHBoxLayout, \
-    QLineEdit, QGridLayout
+from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QWidget, QGridLayout
 from PyQt6.uic import loadUi
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtCore import Qt
 import threading
 from opers.control import key_listener
+import re
 
 from data.characters import chara_dict, chara_list, find
 
@@ -25,12 +26,21 @@ class MainWindow(QWidget):
         self.chara = chara_dict['Jinhsi']
         self.set_data(self.chara)
 
-        self.strategyIndex = [0,0]
-
         # 启动监听线程
         self.stop_listening = threading.Event()
         self.listen_thread = threading.Thread(target=key_listener, args=(self.stop_listening,))
         self.listen_thread.start()
+
+        # 初始化合轴人物按钮属性
+        self.btnChara_1.setProperty("chara", "Jinhsi")
+        self.btnChara_2.setProperty("chara", "YinLin")
+        self.btnChara_3.setProperty("chara", "Verina")
+
+        # 导入预设
+        filename_list = []
+        for file in os.listdir("preset"):
+            filename_list.append(file[:-5])
+        self.preset.addItems(filename_list)
 
         self.bind()
 
@@ -40,8 +50,6 @@ class MainWindow(QWidget):
 
         # 加载界面
         loadUi("WWC.ui", self)
-
-        self.create_widgeStrategy()
 
     # 绑定按钮
     def bind(self):
@@ -55,14 +63,38 @@ class MainWindow(QWidget):
         self.btnChara_2.clicked.connect(lambda: self.select_chara(self.btnChara_2))
         self.btnChara_3.clicked.connect(lambda: self.select_chara(self.btnChara_3))
 
-        # 绑定策略：切人
-        self.btnCC_1.clicked.connect(lambda: self.strategy_changechara(1))
-        self.btnCC_2.clicked.connect(lambda: self.strategy_changechara(2))
-        self.btnCC_3.clicked.connect(lambda: self.strategy_changechara(3))
+        # 绑定保存预设按钮
+        self.btnSaveStrategy.clicked.connect(self.save_strategy)
+
+        # 绑定加载预设按钮
+        self.preset.currentTextChanged.connect(self.load_strategy)
 
         # 绑定最小化和关闭按钮
         self.btnMiniMainWindow.clicked.connect(self.showMinimized)
         self.btnDestroyMainWindow.clicked.connect(self.on_close)
+
+    def load_strategy(self):
+        if self.preset.currentText() == "无（使用前请保存你的策略）":
+            self.strategy.setText("")
+            return
+
+        with open("preset/" + self.preset.currentText() + ".json", "r") as f:
+            data = json.load(f)
+
+        strategy = ""
+        for index, tactic in enumerate(data):
+            if index ==0:
+                strategy = tactic
+            else:
+                strategy += "\n" + tactic
+
+        self.strategy.setText(strategy)
+
+
+    def save_strategy(self):
+        filename = self.btnChara_1.property("chara") + "_" + self.btnChara_2.property("chara") + "_" + self.btnChara_3.property("chara")
+        self.widgetSaveStrategy = SaveStrategy(strategy=self.strategy.toPlainText(),filename=filename)
+        self.widgetSaveStrategy.show()
 
     def select_chara(self, btn):
         self.selectCharaUI = SelectCharaUI(parent=self, btn=btn)
@@ -107,26 +139,6 @@ class MainWindow(QWidget):
             else:
                 dict[i].setStyleSheet("background-color: rgb(255, 215, 0);")
 
-    def create_widgeStrategy(self):
-        self.widgetStrategy = QWidget(self.tabHeZhou)
-        self.widgetStrategy.move(310, 39)
-        self.widgetStrategy.resize(911, 671)
-        self.widgetStrategy.setStyleSheet("background-color: transparent;")
-        self.widgetStrategy.show()
-
-
-    # 创建策略：切人
-    def strategy_changechara(self, num):
-        self.widgetCC_1 = ChangeChara(parent=self.widgetStrategy, num=num)
-
-        if self.strategyIndex[0] == 0:
-            self.widgetCC_1.move(10, 10)
-        else:
-            self.widgetCC_1.move(10, 10* self.strategyIndex[0])
-
-        self.widgetCC_1.show()
-        self.strategyIndex[0] += 1
-
 
 class SelectCharaUI(QWidget):
     def __init__(self, btn, parent=None):
@@ -167,6 +179,7 @@ class SelectCharaUI(QWidget):
 
     def button_clicked(self, chara):
         if self.btnBefore in self.btnSC_tab0:
+            self.btnBefore.setProperty("chara", chara)
             self.btnBefore.setIcon(QtGui.QIcon("imgs/chara/" + chara + ".png"))
         elif self.btnBefore in self.btnSC_tab1:
             self.btnBefore.setIcon(QtGui.QIcon("imgs/chara/" + chara + ".png"))
@@ -190,47 +203,36 @@ class CharaButton(QPushButton):
                            "border: 1px solid gold;")
 
 
-# 策略：更换人物
-class ChangeChara(QWidget):
-    def __init__(self, parent, num):
-        super().__init__(parent)
-        self.labelBG = QLabel(self)
-        self.labelBG.resize(111, 71)
-        self.labelBG.setStyleSheet("border: 2px solid #ffffff; /* 设置边框和颜色 */\n"
-                                   "border-radius: 20px; /* 设置圆角半径 */\n"
-                                   "background-color: rgb(100, 86, 0);")
+class SaveStrategy(QWidget):
+    def __init__(self, strategy, filename):
+        super().__init__()
+        self.strategy = strategy
+        self.initUI()
 
-        self.btnCC = QPushButton(text="C" + str(num))
-        self.btnCC.resize(30, 30)
-        self.btnCC.setStyleSheet("color: rgb(255, 255, 255);\n"
-                                 "background-color: rgb(50, 50, 50);")
-
-        self.lineEdit_1 = QLineEdit(self)
-        self.lineEdit_1.resize(50, 20)
-        self.lineEdit_1.setStyleSheet("color: rgb(255, 255, 255);\n"
-                                      "background-color: rgb(50, 50, 50);")
-        self.lineEdit_2 = QLineEdit(self)
-        self.lineEdit_2.resize(50, 20)
-        self.lineEdit_2.setStyleSheet("color: rgb(255, 255, 255);\n"
-                                      "background-color: rgb(50, 50, 50);")
-
-        self.mainLayout = QHBoxLayout()
-        self.mainLayout.addWidget(self.btnCC)
-
-        self.secLayout = QVBoxLayout()
-        self.secLayout.addWidget(self.lineEdit_1)
-        self.secLayout.addWidget(self.lineEdit_2)
-
-        self.mainLayout.addLayout(self.secLayout)
-        self.setLayout(self.mainLayout)
-        self.resize(111, 71)
-
+        self.name.setText(filename)
         self.bind()
 
-    def bind(self):
-        self.btnCC.clicked.connect(self.button_clicked)
+    def initUI(self):
+        # 设置窗口无边框
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
 
-    def button_clicked(self):
+        # 加载界面
+        loadUi("SaveStrategy.ui", self)
+
+    def bind(self):
+        # 回车绑定保存
+        self.name.returnPressed.connect(self.on_return_pressed)
+
+        # 关闭按钮
+        self.btnDestroySubWindow.clicked.connect(self.close)
+
+    def on_return_pressed(self):
+        filename = self.name.text()
+        tactic = re.split(r'\n', self.strategy)  # 策略转化为列表
+
+        with open('preset/' + filename + '.json', 'w', encoding='utf-8') as f:
+            json.dump(tactic, f, indent=4)
+
         self.close()
 
 

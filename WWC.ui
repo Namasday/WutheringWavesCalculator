@@ -154,7 +154,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>imgs/chara/WeiLiNai.png</normaloff>imgs/chara/WeiLiNai.png</iconset>
+       <normaloff>imgs/chara/Verina.png</normaloff>imgs/chara/Verina.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -167,9 +167,9 @@
      <property name="geometry">
       <rect>
        <x>360</x>
-       <y>0</y>
+       <y>10</y>
        <width>231</width>
-       <height>31</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="font">
@@ -228,19 +228,14 @@
        <string>无（使用前请保存你的策略）</string>
       </property>
      </item>
-     <item>
-      <property name="text">
-       <string>安可&gt;散华&gt;维里奈</string>
-      </property>
-     </item>
     </widget>
     <widget class="QLabel" name="label">
      <property name="geometry">
       <rect>
        <x>310</x>
-       <y>0</y>
+       <y>10</y>
        <width>41</width>
-       <height>31</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="font">
@@ -263,9 +258,9 @@
      <property name="geometry">
       <rect>
        <x>600</x>
-       <y>0</y>
+       <y>10</y>
        <width>101</width>
-       <height>31</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="font">
@@ -329,22 +324,25 @@
       <string>&gt;&gt;</string>
      </property>
     </widget>
-    <widget class="QLabel" name="labelStrategy">
+    <widget class="QTextEdit" name="strategy">
      <property name="geometry">
       <rect>
        <x>310</x>
-       <y>39</y>
+       <y>40</y>
        <width>911</width>
        <height>671</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <family>楷体</family>
+       <pointsize>20</pointsize>
+      </font>
+     </property>
      <property name="styleSheet">
       <string notr="true">border: 2px solid #ffffff; /* 设置边框和颜色 */
-border-radius: 20px; /* 设置圆角半径 */
-background-color: rgb(20, 20, 20);</string>
-     </property>
-     <property name="text">
-      <string/>
+background-color: rgb(20, 20, 20);
+color: rgb(255, 255, 255);</string>
      </property>
     </widget>
    </widget>
