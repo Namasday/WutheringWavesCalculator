@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-image = cv2.imread('template/XieZou_ReRong.png')
+image = cv2.imread('template/XieZou.png')
 
 def check_xiezou(attribute):
     """
@@ -17,4 +17,4 @@ def check_xiezou(attribute):
     else:
         return False
 
-print(check_xiezou("ReRong"))
+print(check_xiezou(""))

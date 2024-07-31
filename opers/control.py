@@ -44,112 +44,97 @@ class Control:
         win32gui.PostMessage(self.hwnd, win32con.WM_KEYUP, win32con.VK_SPACE, 0)
 
 
-startKey = Key.f5  # 开始键
+class KeyListener:
+    def __init__(self, strategy, stopListening):
+        self.strategy = strategy
+        self.startKey = Key.f5
+        self.running = threading.Event()
+        self.stopListening = stopListening
 
-"""
-声骸技能，共鸣技能，共鸣解放，普攻，大招普攻，重击，大招后重击，跳跃，空中攻击，切换人物，闪避
-q,e,r,a,ra,A~0.9,rA~0.9,s,sa,c1,c2,c3,sh
-"""
-strategy = '''
-c3,r,a^2.5,0.5,e,0.9,s,0.3,a,0.3,a,0.5,a
-c2,a^2.2,A-,0.9,r,a^1.8,A+,0.6,e,0.1
-c1,e,0.5
-c3,a^1,q
-c1,e,0.9,q,0.2,a^1.5
-c2,a^2.2,A~0.9,0.6,e,q
-c1,a^1.5,r,a^2.28,e,a^3.12,sh,a^0.85,e,a^3.12,sh,a^0.85,e,rA~0.5
-c2,a^2.2,A~0.9,0.6,e
-'''
+    def battle(self):
+        hwnd = win32gui.FindWindow("UnrealWindow", "鸣潮  ")
+        if hwnd == 0:
+            print("未找到游戏窗口")
+            return
 
-# 全局变量
-running = threading.Event()
-listen_thread = None
-battle_thread = None
+        control = Control(hwnd)
+        tactic = re.split(r'[,\n]', self.strategy)  # 策略转化为列表
 
+        while True:
+            for oper in tactic:
+                if not self.running.is_set():
+                    return
 
-def on_press(key):
-    global running, battle_thread
-    if key == startKey:
-        if running.is_set():
-            running.clear()
-        else:
-            running.set()
-            battle_thread = threading.Thread(target=battle)
-            battle_thread.start()
+                try:
+                    wait_time = float(oper)  # 如果是数字，等待时间
+                    time.sleep(wait_time)
+                    continue
+                except:
+                    pass
 
+                if len(oper) == 1:  # 如果只有一个字符，点击
+                    if oper == "a":  # 普攻
+                        control.click()
+                        continue
 
-def battle():
-    global running
-    hwnd = win32gui.FindWindow("UnrealWindow", "鸣潮  ")
-    if hwnd == 0:
-        print("未找到游戏窗口")
-        return
+                    elif oper == "s":  # 跳跃
+                        control.space()
+                        continue
 
-    control = Control(hwnd)
-    tactic: list = re.split(r'[,\n]', strategy)  # 策略转化为列表
+                    else:
+                        control.tap(oper)
+                        continue
 
-    while True:
-        for oper in tactic:
-            if not running.is_set():
-                return
+                if "~" in oper:  # 重击或大招状态下重击
+                    operList: list = oper.split("~")
+                    click_time = float(operList[1])
+                    control.click(click_time)
+                    continue
 
-            try:
-                wait_time = float(oper)  # 如果是数字，等待时间
-                time.sleep(wait_time)
-                continue
-            except:
-                pass
+                if oper == "A-":
+                    control.click_press()
+                    continue
 
-            if len(oper) == 1:  # 如果只有一个字符，点击
-                if oper == "a":  # 普攻
+                if oper == "A+":
+                    control.click_release()
+                    continue
+
+                if oper in ["c1", "c2", "c3"]:  # 切换人物
+                    control.tap(oper[1])
+                    continue
+
+                if oper in ["ra", "sa"]:  # 大招状态下普攻或空中攻击
                     control.click()
                     continue
 
-                elif oper == "s":  # 跳跃
-                    control.space()
+                if "^" in oper:  # 测轴用，连按时间
+                    operList: list = oper.split("^")
+                    click_long = float(operList[1])
+                    now = time.time()
+                    while time.time() - now < click_long:
+                        control.click()
+                        time.sleep(0.1)
+
                     continue
 
-                else:
-                    control.tap(oper)
+                if oper == "sh":
+                    control.mouse_right()
                     continue
 
-            if "~" in oper:  # 重击或大招状态下重击
-                operList: list = oper.split("~")
-                click_time = float(operList[1])
-                control.click(click_time)
-                continue
+    def on_press(self, key):
+        if key == self.startKey:
+            if self.running.is_set():
+                self.running.clear()
+            else:
+                self.running.set()
+                battle_thread = threading.Thread(target=self.battle)
+                battle_thread.start()
 
-            if oper == "A-":
-                control.click_press()
-                continue
-
-            if oper == "A+":
-                control.click_release()
-                continue
-
-            if oper in ["c1", "c2", "c3"]:  # 切换人物
-                control.tap(oper[1])
-                continue
-
-            if oper in ["ra", "sa"]:  # 大招状态下普攻或空中攻击
-                control.click()
-                continue
-
-            if "^" in oper:  # 测轴用，连按时间
-                operList: list = oper.split("^")
-                click_long = float(operList[1])
-                now = time.time()
-                while time.time() - now < click_long:
-                    control.click()
-                    time.sleep(0.1)
-
-                continue
-
-            if oper == "sh":
-                control.mouse_right()
-                continue
+    def start(self):
+        with Listener(on_press=self.on_press) as listener:
+            self.stopListening.wait()
 
 
-def key_listener(stop_listening):
-    with Listener(on_press=on_press) as listener:
-        stop_listening.wait()
+def key_listener(strategy, stopListening):
+    listener = KeyListener(strategy, stopListening)
+    listener.start()
