@@ -1,5 +1,19 @@
 import cv2
-import numpy as np
+
+
+class ImageMatch:
+    """
+    图像匹配
+    """
+    def check_bianzou(self):
+        pass
+
+    def check_skill(self):
+        pass
+
+    def check_ending(self):
+        pass
+
 
 image = cv2.imread('template/XieZou.png')
 
