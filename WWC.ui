@@ -102,7 +102,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>imgs/chara/Jinhsi.png</normaloff>imgs/chara/Jinhsi.png</iconset>
+       <normaloff>imgs/chara/ENCORE.png</normaloff>imgs/chara/ENCORE.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -128,7 +128,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>imgs/chara/YinLin.png</normaloff>imgs/chara/YinLin.png</iconset>
+       <normaloff>imgs/chara/SANHUA.png</normaloff>imgs/chara/SANHUA.png</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -154,7 +154,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>imgs/chara/Verina.png</normaloff>imgs/chara/Verina.png</iconset>
+       <normaloff>imgs/chara/VERINA.png</normaloff>imgs/chara/VERINA.png</iconset>
      </property>
      <property name="iconSize">
       <size>

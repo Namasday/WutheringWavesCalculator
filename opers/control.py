@@ -4,6 +4,7 @@ from pynput.keyboard import Key, Listener
 import re
 import threading
 from constant import hwnd
+from recognition.recognition import Recognition
 
 
 class Control:
@@ -57,7 +58,8 @@ class KeyListener:
             print("未找到游戏窗口")
             return
 
-        control = Control(hwnd)
+        control = Control(hwnd)  # 控制
+        recognition = Recognition()  # 识别
         tactic = re.split(r'[,\n]', self.strategy)  # 策略转化为列表
 
         while True:
@@ -81,6 +83,19 @@ class KeyListener:
                         control.space()
                         continue
 
+                    elif oper == "r":  # 共鸣解放
+                        if recognition.ending() == 1:  # 如果可以释放共鸣解放
+                            control.tap("r")
+                            time.sleep(1.5)
+                            while True:
+                                if recognition.ending() == 0:
+                                    break
+
+                            continue
+
+                        else:
+                            continue
+
                     else:
                         control.tap(oper)
                         continue
@@ -101,6 +116,17 @@ class KeyListener:
 
                 if oper in ["c1", "c2", "c3"]:  # 切换人物
                     control.tap(oper[1])
+
+                    while True:
+                        reco = recognition.bianzou()
+                        if reco == 0:  # 变奏检测无效
+                            time.sleep(0.5)
+                            break
+                        elif reco == 1:  # 变奏结束
+                            break
+                        else:
+                            continue
+
                     continue
 
                 if oper in ["ra", "sa"]:  # 大招状态下普攻或空中攻击
@@ -113,7 +139,7 @@ class KeyListener:
                     now = time.time()
                     while time.time() - now < click_long:
                         control.click()
-                        time.sleep(0.1)
+                        time.sleep(0.05)
 
                     continue
 

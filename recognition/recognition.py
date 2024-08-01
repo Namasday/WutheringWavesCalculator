@@ -2,32 +2,60 @@ from PIL import Image
 from rapidocr_onnxruntime import RapidOCR
 import cv2
 import numpy as np
-from screenshot import screenshot
+from recognition.screenshot import screenshot
 
-ocr = RapidOCR()
 
 class Recognition:
-    def ending(self) -> bool:
-        """
-        检查共鸣解放是否有白像素，用于确定是否开启大招并等待
-        """
-        gameScreenshot = screenshot()
-        imageEnding = gameScreenshot[1903:1964, 3561:3683, :]
-        imageEnding = np.mean(imageEnding[..., :3], axis=2).astype(np.uint8)
-        threshold = 240
-        imageEnding = (imageEnding > threshold).astype(np.uint8) * 255
-        image = Image.fromarray(imageEnding, 'L')
-        image.show()
+    def __init__(self):
+        self.ocr = RapidOCR()
+        # self.image_path = 'screenshot/screenshot.png'
+        # self.image = Image.open(self.image_path)
 
-        result = ocr(imageEnding)[0]
+    def ending(self) -> int:
+        """
+        检测能否开启大招并等待
+        """
+        gameScreenshot = screenshot()  # 截图
+        # gameScreenshot = np.array(self.image)
+        imageEnding = gameScreenshot[1903:1964, 3561:3683, :]  # 截取共鸣解放数字区域
+        imageEnding = np.mean(imageEnding[..., :3], axis=2).astype(np.uint8)  # 截图转化为灰度图像
+        threshold = 240  # 阈值
+        imageEnding = (imageEnding > threshold).astype(np.uint8) * 255  # 二值化图像
+
+        # 先判断有无数字文本
+        result = self.ocr(imageEnding)[0]
         if result:
-            return False    # 共鸣解放CD中
+            return 0  # 共鸣解放CD中
 
+        # 再判断是否有白像素
         if 255 in imageEnding:
-            return True      # 共鸣解放可用
+            return 1  # 共鸣解放可用
         else:
-            return False     # 共鸣解放能量不足
+            return 2  # 共鸣解放能量不足
 
+    def bianzou(self) -> int:
+        """
+        检测
+        """
+        gameScreenshot = screenshot()  # 截图
+        # gameScreenshot = np.array(self.image)
 
-recognition = Recognition()
-print(recognition.ending())
+        imageSkill = gameScreenshot[1903:1964, 3138:3255, :]  # 截取共鸣技能数字区域
+        imageBaby = gameScreenshot[1903:1964, 3350:3471, :]  # 截取声骸技能数字区域
+
+        # 截图转化为灰度图像
+        imageSkill = np.mean(imageSkill[..., :3], axis=2).astype(np.uint8)
+        imageBaby = np.mean(imageBaby[..., :3], axis=2).astype(np.uint8)
+
+        imageCon = np.concatenate((imageSkill, imageBaby), axis=1)  # 拼接两张图
+        threshold = 240  # 阈值
+        imageCon = (imageCon > threshold).astype(np.uint8) * 255  # 二值化图像
+
+        result = self.ocr(imageCon)[0]
+        if result:
+            return 0  # 检测到数字，当前函数检测失效
+
+        if 255 in imageCon:
+            return 1  # 检测到白像素，结束变奏
+        else:
+            return 2  # 循环等待至变奏完成

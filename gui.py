@@ -32,9 +32,9 @@ class MainWindow(QWidget):
         self.controler.start()
 
         # 初始化合轴人物按钮属性
-        self.btnChara_1.setProperty("chara", "Jinhsi")
-        self.btnChara_2.setProperty("chara", "YinLin")
-        self.btnChara_3.setProperty("chara", "Verina")
+        self.btnChara_1.setProperty("chara", "ENCORE")
+        self.btnChara_2.setProperty("chara", "SANHUA")
+        self.btnChara_3.setProperty("chara", "VERINA")
 
         # 导入预设
         filename_list = []
