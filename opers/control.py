@@ -3,8 +3,7 @@ import win32gui, win32con
 from pynput.keyboard import Key, Listener
 import re
 import threading
-from constant import hwnd
-from recognition.recognition import recognition
+from reco.recognition import recognition
 
 
 class Control:
@@ -54,6 +53,7 @@ class KeyListener:
         self.stopListening = stopListening
 
     def battle(self):
+        hwnd = win32gui.FindWindow("UnrealWindow", "鸣潮  ")
         if hwnd == 0:
             print("未找到游戏窗口")
             return
