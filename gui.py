@@ -3,11 +3,11 @@ import os
 import sys
 import threading
 
-from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QWidget, QGridLayout, QHBoxLayout, QVBoxLayout, QDialog
+from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QWidget, QGridLayout, QDialog, QMainWindow
 from PyQt6.uic import loadUi
 from PyQt6 import QtCore, QtGui
-from PyQt6.QtCore import Qt, QThread
-from opers.control import key_listener
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from opers.control import KeyListener
 import re
 
 from data.characters import chara_dict, chara_list
@@ -18,18 +18,13 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning, message="sipPyTypeDict.*")
 
 
-class MainWindow(QWidget):
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
 
         self.chara = chara_dict['Jinhsi']
         self.set_data(self.chara)
-
-        # 启动监听线程
-        self.stopListening = threading.Event()
-        self.controler = Worker(parent=self, stopListening=self.stopListening)
-        self.controler.start()
 
         # 初始化合轴人物按钮属性
         self.btnChara_1.setProperty("chara", "ENCORE")
@@ -42,6 +37,10 @@ class MainWindow(QWidget):
             filename_list.append(file[:-5])
         self.preset.addItems(filename_list)
 
+        # 启动监听线程
+        self.listening()
+
+        # 绑定按钮
         self.bind()
 
     def initUI(self):
@@ -84,12 +83,18 @@ class MainWindow(QWidget):
 
     def reset_thread(self):
         """
-        重启监听线程
+        策略更改时重启监听线程
         """
-        self.stopListening.set()
-        self.stopListening.clear()
-        self.controler = Worker(parent=self, stopListening=self.stopListening)
-        self.controler.start()
+        self.listener.signalStop.emit()
+        self.listener.wait()
+        self.listening()
+
+    def listening(self):
+        """
+        启动监听线程
+        """
+        self.listener = Worker(self)
+        self.listener.start()
 
     def load_strategy(self, filename):
         """
@@ -173,15 +178,27 @@ class MainWindow(QWidget):
 
 
 class Worker(QThread):
-    # new_strategy = pyqtSignal(str)
-    def __init__(self, parent, stopListening):
+    signalStop = pyqtSignal()
+    def __init__(self, parent):
         super().__init__()
-        self.parent = parent
-        self.stopListening = stopListening
+        self.strategy = parent.strategy.toPlainText()
+        self.stopListening = threading.Event()
+        self.listener = None
+
+        self.signalStop.connect(self.stop)
 
     def run(self):
-        strategy = self.parent.strategy.toPlainText()
-        key_listener(strategy, self.stopListening)
+        """
+        启动监听
+        """
+        self.listener = KeyListener(self.strategy, self.stopListening)
+        self.listener.start()
+
+    def stop(self):
+        """
+        停止监听
+        """
+        self.stopListening.set()
 
 
 class SelectCharaUI(QWidget):

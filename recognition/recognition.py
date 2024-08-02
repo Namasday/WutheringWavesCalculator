@@ -1,29 +1,27 @@
 from PIL import Image
-from rapidocr_onnxruntime import RapidOCR
+from rapidocr_openvino import RapidOCR
 import cv2
 import numpy as np
 from recognition.screenshot import screenshot
+import time
+
+
+ocr = RapidOCR()
 
 
 class Recognition:
-    def __init__(self):
-        self.ocr = RapidOCR()
-        # self.image_path = 'screenshot/screenshot.png'
-        # self.image = Image.open(self.image_path)
-
     def ending(self) -> int:
         """
         检测能否开启大招并等待
         """
         gameScreenshot = screenshot()  # 截图
-        # gameScreenshot = np.array(self.image)
         imageEnding = gameScreenshot[1903:1964, 3561:3683, :]  # 截取共鸣解放数字区域
         imageEnding = np.mean(imageEnding[..., :3], axis=2).astype(np.uint8)  # 截图转化为灰度图像
         threshold = 240  # 阈值
         imageEnding = (imageEnding > threshold).astype(np.uint8) * 255  # 二值化图像
 
         # 先判断有无数字文本
-        result = self.ocr(imageEnding)[0]
+        result = ocr(imageEnding)[0]
         if result:
             return 0  # 共鸣解放CD中
 
@@ -38,8 +36,6 @@ class Recognition:
         检测
         """
         gameScreenshot = screenshot()  # 截图
-        # gameScreenshot = np.array(self.image)
-
         imageSkill = gameScreenshot[1903:1964, 3138:3255, :]  # 截取共鸣技能数字区域
         imageBaby = gameScreenshot[1903:1964, 3350:3471, :]  # 截取声骸技能数字区域
 
@@ -51,7 +47,7 @@ class Recognition:
         threshold = 240  # 阈值
         imageCon = (imageCon > threshold).astype(np.uint8) * 255  # 二值化图像
 
-        result = self.ocr(imageCon)[0]
+        result = ocr(imageCon)[0]
         if result:
             return 0  # 检测到数字，当前函数检测失效
 
@@ -59,3 +55,6 @@ class Recognition:
             return 1  # 检测到白像素，结束变奏
         else:
             return 2  # 循环等待至变奏完成
+
+
+recognition = Recognition()

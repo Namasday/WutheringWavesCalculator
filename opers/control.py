@@ -4,7 +4,7 @@ from pynput.keyboard import Key, Listener
 import re
 import threading
 from constant import hwnd
-from recognition.recognition import Recognition
+from recognition.recognition import recognition
 
 
 class Control:
@@ -59,7 +59,6 @@ class KeyListener:
             return
 
         control = Control(hwnd)  # 控制
-        recognition = Recognition()  # 识别
         tactic = re.split(r'[,\n]', self.strategy)  # 策略转化为列表
 
         while True:
@@ -159,8 +158,3 @@ class KeyListener:
     def start(self):
         with Listener(on_press=self.on_press) as listener:
             self.stopListening.wait()
-
-
-def key_listener(strategy, stopListening):
-    listener = KeyListener(strategy, stopListening)
-    listener.start()
