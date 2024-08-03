@@ -63,6 +63,12 @@ class KeyListener:
         control = Control(Setting.hwnd)  # 控制
         tactic = re.split(r'[,\n]', self.strategy)  # 策略转化为列表
 
+        # 初始化人物变奏技能时间
+        cdBianzou = {"c1": 1,
+                     "c2": 1,
+                     "c3": 1}
+        now = None  # 当前时间
+
         while True:
             for oper in tactic:
                 if not self.running.is_set():
@@ -87,7 +93,6 @@ class KeyListener:
                     elif oper == "r":  # 共鸣解放
                         if recognition.ending() == 1:  # 如果可以释放共鸣解放
                             control.tap("r")
-                            time.sleep(1.5)
                             while True:
                                 if recognition.ending() == 0:
                                     break
@@ -117,13 +122,17 @@ class KeyListener:
 
                 if oper in ["c1", "c2", "c3"]:  # 切换人物
                     control.tap(oper[1])
+                    if cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
+                        now = time.time()  # 变奏计时开始
 
                     while True:
                         reco = recognition.bianzou()
                         if reco == 0:  # 变奏检测无效
-                            time.sleep(0.5)
+                            time.sleep(cdBianzou[oper])
                             break
                         elif reco == 1:  # 变奏结束
+                            if cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
+                                cdBianzou[oper] = time.time() - now  # 变奏计时结束
                             break
                         else:
                             continue

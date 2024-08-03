@@ -1,12 +1,12 @@
+import time
+
 import win32gui
 import win32ui
+from PIL import Image
 from rapidocr_openvino import RapidOCR
 import numpy as np
 from modules.constant import Setting
 from ctypes import windll
-
-
-ocr = RapidOCR()
 
 
 def screenshot():
@@ -81,18 +81,30 @@ class Recognition:
         imageSkill = np.mean(imageSkill[..., :3], axis=2).astype(np.uint8)
         imageBaby = np.mean(imageBaby[..., :3], axis=2).astype(np.uint8)
 
-        imageCon = np.concatenate((imageSkill, imageBaby), axis=1)  # 拼接两张图
+        # 二值化图像
         threshold = 240  # 阈值
-        imageCon = (imageCon > threshold).astype(np.uint8) * 255  # 二值化图像
+        imageSkill = (imageSkill > threshold).astype(np.uint8) * 255
+        imageBaby = (imageBaby > threshold).astype(np.uint8) * 255
 
-        result = ocr(imageCon)[0]
-        if result:
-            return 0  # 检测到数字，当前函数检测失效
+        # 检测数字
+        cd_skill = ocr(imageSkill)[0]
+        cd_Baby = ocr(imageBaby)[0]
+        if cd_skill and cd_Baby:
+            return 0  # 共鸣技能与声骸技能检测到数字，当前函数检测失效
+
+        # 检测白像素
+        if cd_skill:
+            imageCon = imageBaby
+        elif cd_Baby:
+            imageCon = imageSkill
+        else:
+            imageCon = imageSkill
 
         if 255 in imageCon:
             return 1  # 检测到白像素，结束变奏
         else:
-            return 2  # 循环等待至变奏完成
+            return 2  # 未检测到败象素，循环检测
 
 
 recognition = Recognition()
+ocr = RapidOCR(det_limit_side_len=40)
