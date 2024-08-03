@@ -3,9 +3,10 @@ import os
 import sys
 import threading
 
+from PyQt6.QtGui import QMouseEvent
 from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QWidget, QGridLayout, QDialog, QMainWindow
 from PyQt6 import QtCore, QtGui
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
 from PyQt6.uic import loadUi
 
 from modules.control import KeyListener
