@@ -3,7 +3,7 @@ import os
 import sys
 import threading
 
-from PyQt6.QtGui import QMouseEvent
+from PyQt6.QtGui import QMouseEvent, QFont
 from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QWidget, QGridLayout, QDialog, QMainWindow
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
@@ -39,9 +39,13 @@ class MainWindow(QMainWindow):
         for file in os.listdir("preset"):
             filename_list.append(file[:-5])
         self.preset.addItems(filename_list)
+        self.preset.setFont(QFont("楷体", 10))
 
         # 启动监听线程
         self.listening()
+
+        # 拖动窗口
+        self.mousePress = False
 
         # 绑定按钮
         self.bind()
@@ -83,6 +87,18 @@ class MainWindow(QMainWindow):
         # 绑定最小化和关闭按钮
         self.btnMiniMainWindow.clicked.connect(self.showMinimized)
         self.btnDestroyMainWindow.clicked.connect(self.close)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.mousePress = True
+            self.offsetX = event.globalPosition().x() - self.pos().x()
+            self.offsetY = event.globalPosition().y() - self.pos().y()
+
+    def mouseMoveEvent(self, event):
+        if self.mousePress:
+            x = event.globalPosition().x() - self.offsetX
+            y = event.globalPosition().y() - self.offsetY
+            self.move(int(x), int(y))
 
     def reset_thread(self):
         """
@@ -169,6 +185,10 @@ class MainWindow(QMainWindow):
         :param index: 索引
         """
         self.tab.setCurrentIndex(index)
+
+
+class DraggalbeWidget(QWidget):
+    pass
 
 
 class Worker(QThread):
