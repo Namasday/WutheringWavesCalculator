@@ -5,16 +5,16 @@ import threading
 
 from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QWidget, QGridLayout, QDialog, QMainWindow
 from PyQt6 import QtCore, QtGui
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QFile
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.uic import loadUi
 
-from opers.control import KeyListener
+from modules.control import KeyListener
 import re
 
 from data.characters import chara_dict, chara_list
+import rcc_resources
 
 import warnings
-import rcc_resources
 
 # 忽略警告
 warnings.filterwarnings("ignore", category=DeprecationWarning, message="sipPyTypeDict.*")

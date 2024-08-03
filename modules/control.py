@@ -3,7 +3,8 @@ import win32gui, win32con
 from pynput.keyboard import Key, Listener
 import re
 import threading
-from reco.recognition import recognition
+from modules.recognition import recognition
+from modules.constant import Setting
 
 
 class Control:
@@ -53,12 +54,13 @@ class KeyListener:
         self.stopListening = stopListening
 
     def battle(self):
-        hwnd = win32gui.FindWindow("UnrealWindow", "鸣潮  ")
-        if hwnd == 0:
-            print("未找到游戏窗口")
-            return
+        if Setting.hwnd == 0:
+            Setting.hwnd = win32gui.FindWindow("UnrealWindow", "鸣潮  ")
+            if Setting.hwnd == 0:
+                print("未找到游戏窗口")
+                return
 
-        control = Control(hwnd)  # 控制
+        control = Control(Setting.hwnd)  # 控制
         tactic = re.split(r'[,\n]', self.strategy)  # 策略转化为列表
 
         while True:
