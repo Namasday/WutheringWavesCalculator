@@ -239,7 +239,7 @@
      <widget class="QComboBox" name="preset">
       <property name="geometry">
        <rect>
-        <x>369</x>
+        <x>550</x>
         <y>5</y>
         <width>210</width>
         <height>30</height>
@@ -272,7 +272,7 @@ color: rgb(255, 255, 255);
        <bool>false</bool>
       </property>
       <property name="currentText">
-       <string>无（使用前请保存你的策略）</string>
+       <string/>
       </property>
       <property name="currentIndex">
        <number>0</number>
@@ -300,16 +300,16 @@ color: rgb(255, 255, 255);
       </property>
       <item>
        <property name="text">
-        <string>无（使用前请保存你的策略）</string>
+        <string/>
        </property>
       </item>
      </widget>
      <widget class="QLabel" name="lbPreset">
       <property name="geometry">
        <rect>
-        <x>319</x>
+        <x>310</x>
         <y>10</y>
-        <width>40</width>
+        <width>230</width>
         <height>20</height>
        </rect>
       </property>
@@ -323,7 +323,7 @@ color: rgb(255, 255, 255);
        <string notr="true">background-color: transparent;</string>
       </property>
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ffffff;&quot;&gt;预设：&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ffffff;&quot;&gt;预设(使用前请保存你的策略)：&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="textFormat">
        <enum>Qt::AutoText</enum>
@@ -332,7 +332,7 @@ color: rgb(255, 255, 255);
      <widget class="QPushButton" name="btnSaveStrategy">
       <property name="geometry">
        <rect>
-        <x>610</x>
+        <x>850</x>
         <y>10</y>
         <width>90</width>
         <height>20</height>
@@ -360,7 +360,7 @@ background-color: rgb(20, 20, 20);</string>
      <widget class="QTextEdit" name="strategy">
       <property name="geometry">
        <rect>
-        <x>319</x>
+        <x>310</x>
         <y>40</y>
         <width>901</width>
         <height>620</height>
@@ -916,10 +916,10 @@ background-color: rgb(32, 36, 42);</string>
      <widget class="QPushButton" name="btnChara_2">
       <property name="geometry">
        <rect>
-        <x>113</x>
+        <x>110</x>
         <y>10</y>
-        <width>93</width>
-        <height>184</height>
+        <width>92</width>
+        <height>122</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -934,8 +934,8 @@ background-color: rgb(32, 36, 42);</string>
       </property>
       <property name="iconSize">
        <size>
-        <width>91</width>
-        <height>182</height>
+        <width>90</width>
+        <height>120</height>
        </size>
       </property>
      </widget>
@@ -944,8 +944,8 @@ background-color: rgb(32, 36, 42);</string>
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>93</width>
-        <height>184</height>
+        <width>92</width>
+        <height>122</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -960,18 +960,18 @@ background-color: rgb(32, 36, 42);</string>
       </property>
       <property name="iconSize">
        <size>
-        <width>91</width>
-        <height>182</height>
+        <width>90</width>
+        <height>120</height>
        </size>
       </property>
      </widget>
      <widget class="QPushButton" name="btnChara_3">
       <property name="geometry">
        <rect>
-        <x>216</x>
+        <x>210</x>
         <y>10</y>
-        <width>93</width>
-        <height>184</height>
+        <width>92</width>
+        <height>122</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -986,8 +986,8 @@ background-color: rgb(32, 36, 42);</string>
       </property>
       <property name="iconSize">
        <size>
-        <width>91</width>
-        <height>182</height>
+        <width>90</width>
+        <height>120</height>
        </size>
       </property>
      </widget>
@@ -1563,7 +1563,7 @@ background-color: rgb(20, 20, 20);</string>
         <x>20</x>
         <y>20</y>
         <width>91</width>
-        <height>182</height>
+        <height>122</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -1579,8 +1579,8 @@ border-color: transparent;</string>
       </property>
       <property name="iconSize">
        <size>
-        <width>91</width>
-        <height>182</height>
+        <width>90</width>
+        <height>120</height>
        </size>
       </property>
      </widget>
@@ -1826,7 +1826,7 @@ background-color: rgb(20, 20, 20);</string>
      </property>
     </widget>
    </widget>
-   <zorder>verticalLayoutWidget_2</zorder>
+   <zorder>tab</zorder>
    <zorder>lbTitle</zorder>
    <zorder>btnDestroyMainWindow</zorder>
    <zorder>btnMiniMainWindow</zorder>

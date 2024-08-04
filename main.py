@@ -3,12 +3,13 @@ import os
 import sys
 import threading
 
-from PyQt6.QtGui import QMouseEvent, QFont
+from PyQt6.QtGui import QMouseEvent, QFont, QCloseEvent
 from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QWidget, QGridLayout, QDialog, QMainWindow
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
 from PyQt6.uic import loadUi
 
+from modules.constant import Setting
 from modules.control import KeyListener
 import re
 
@@ -22,6 +23,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning, message="sipPyTyp
 
 
 class MainWindow(QMainWindow):
+    signalCharaChange = pyqtSignal(QPushButton,str)
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -30,9 +32,12 @@ class MainWindow(QMainWindow):
         self.set_data(self.chara)
 
         # 初始化合轴人物按钮属性
-        self.btnChara_1.setProperty("chara", "ENCORE")
-        self.btnChara_2.setProperty("chara", "SANHUA")
-        self.btnChara_3.setProperty("chara", "VERINA")
+        self.btnChara_1.setIcon(QtGui.QIcon("imgs/chara/" + Setting.hezhouChara_1 + ".png"))
+        self.btnChara_1.setProperty("chara", Setting.hezhouChara_1)
+        self.btnChara_2.setIcon(QtGui.QIcon("imgs/chara/" + Setting.hezhouChara_2 + ".png"))
+        self.btnChara_2.setProperty("chara", Setting.hezhouChara_2)
+        self.btnChara_3.setIcon(QtGui.QIcon("imgs/chara/" + Setting.hezhouChara_3 + ".png"))
+        self.btnChara_3.setProperty("chara", Setting.hezhouChara_3)
 
         # 导入预设
         filename_list = []
@@ -40,12 +45,15 @@ class MainWindow(QMainWindow):
             filename_list.append(file[:-5])
         self.preset.addItems(filename_list)
         self.preset.setFont(QFont("楷体", 10))
+        self.strategy.setText(Setting.strategy)
 
         # 启动监听线程
         self.listening()
 
         # 拖动窗口
         self.mousePress = False
+        self.offsetX = 0
+        self.offsetY = 0
 
         # 绑定按钮
         self.bind()
@@ -84,17 +92,43 @@ class MainWindow(QMainWindow):
         # 策略更改时重启监听
         self.strategy.textChanged.connect(self.reset_thread)
 
+        # 修改人物按钮的信号绑定
+        self.signalCharaChange.connect(self.change_chara)
+
         # 绑定最小化和关闭按钮
         self.btnMiniMainWindow.clicked.connect(self.showMinimized)
         self.btnDestroyMainWindow.clicked.connect(self.close)
 
+    def closeEvent(self, event: QCloseEvent) -> None:
+        """
+        关闭事件
+        """
+        strategy = self.strategy.toPlainText().split("\n")
+        data = {
+            'hezhouChara_1': self.btnChara_1.property("chara"),
+            'hezhouChara_2': self.btnChara_2.property("chara"),
+            'hezhouChara_3': self.btnChara_3.property("chara"),
+            'strategy': strategy
+        }
+
+        with open("config.json", 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4)
+
+        event.accept()
+
     def mousePressEvent(self, event):
+        """
+        鼠标按下事件
+        """
         if event.button() == Qt.MouseButton.LeftButton:
             self.mousePress = True
             self.offsetX = event.globalPosition().x() - self.pos().x()
             self.offsetY = event.globalPosition().y() - self.pos().y()
 
     def mouseMoveEvent(self, event):
+        """
+        鼠标移动事件
+        """
         if self.mousePress:
             x = event.globalPosition().x() - self.offsetX
             y = event.globalPosition().y() - self.offsetY
@@ -120,7 +154,7 @@ class MainWindow(QMainWindow):
         加载预设
         :param filename: 文件名
         """
-        if filename == "无（使用前请保存你的策略）":
+        if filename == "":
             self.strategy.setText("")
             return
 
@@ -147,18 +181,34 @@ class MainWindow(QMainWindow):
 
     def select_chara(self, btn):
         """
-        选择人物
+        创建选择人物界面
         """
         self.selectCharaUI = SelectCharaUI(parent=self, btn=btn)
         position = btn.pos()
         self.selectCharaUI.move(position.x() + 141, position.y())
         self.selectCharaUI.show()
 
-    def change_chara(self, image_path):
+    def change_chara(self, btn, chara):
         """
         切换按钮人物
         """
-        self.btnChara.setIcon(QtGui.QIcon(image_path))
+        # 合轴界面如果有相同的人物，则切换
+        hezhouBtnList = [self.btnChara_1, self.btnChara_2, self.btnChara_3]
+        charaBefore = btn.property("chara")
+        if btn in hezhouBtnList:
+            for button in hezhouBtnList:
+                if button == btn:
+                    continue
+                else:
+                    if button.property("chara") == chara:
+                        imagePathBefore = "imgs/chara/" + charaBefore + ".png"
+                        button.setIcon(QtGui.QIcon(imagePathBefore))
+                        button.setProperty("chara", charaBefore)
+                        break
+
+        imagePath = "imgs/chara/" + chara + ".png"
+        btn.setIcon(QtGui.QIcon(imagePath))
+        btn.setProperty("chara", chara)
 
     def set_data(self, chara):
         """
@@ -185,10 +235,6 @@ class MainWindow(QMainWindow):
         :param index: 索引
         """
         self.tab.setCurrentIndex(index)
-
-
-class DraggalbeWidget(QWidget):
-    pass
 
 
 class Worker(QThread):
@@ -223,10 +269,6 @@ class SelectCharaUI(QWidget):
         self.btnBefore = btn
         self.initUI()
 
-        # 人物选择按钮分类
-        self.btnSC_tab0 = [self.parent.btnChara_1, self.parent.btnChara_2, self.parent.btnChara_3]
-        self.btnSC_tab1 = [self.parent.btnChara]
-
     def initUI(self):
         self.mainLayout = QGridLayout()
 
@@ -237,7 +279,6 @@ class SelectCharaUI(QWidget):
             self.pushButton = CharaButton(charaName)
             self.pushButton.clicked.connect(lambda checked, chara=charaName: self.button_clicked(chara))
             self.mainLayout.addWidget(self.pushButton, row, col)
-            self.pushButton.setObjectName("btn" + charaName)
 
         lenth = len(chara_list)
         if lenth % 8 == 0:
@@ -248,35 +289,25 @@ class SelectCharaUI(QWidget):
         self.label = QLabel(self)
         self.label.setStyleSheet("background-color: rgb(50, 50, 50);"
                                  "border: 1px solid white;")
-        self.label.resize(10 + 101 * 8, 10 + 192 * row_max)
+        self.label.resize(10 + 100 * 8, 10 + 130 * row_max)
 
         self.setLayout(self.mainLayout)
-        self.resize(10 + 101 * 8, 10 + 192 * row_max)
+        self.resize(10 + 100 * 8, 10 + 130 * row_max)
 
     def button_clicked(self, chara):
-        if self.btnBefore in self.btnSC_tab0:
-            self.btnBefore.setProperty("chara", chara)
-            self.btnBefore.setIcon(QtGui.QIcon("imgs/chara/" + chara + ".png"))
-        elif self.btnBefore in self.btnSC_tab1:
-            self.btnBefore.setIcon(QtGui.QIcon("imgs/chara/" + chara + ".png"))
-            try:
-                self.parent.chara = chara_dict[chara]
-                self.parent.set_data(self.parent.chara)
-            except:
-                pass
-
+        self.parent.signalCharaChange.emit(self.btnBefore, chara)
         self.close()
 
 
 class CharaButton(QPushButton):
-    def __init__(self, charaName):
+    def __init__(self, chara):
         super().__init__()
-        self.chara = charaName
-        self.resize(91, 182)
-        self.setIconSize(QtCore.QSize(91, 182))
-        self.setIcon(QtGui.QIcon("imgs/chara/" + self.chara + ".png"))
+        self.resize(92, 122)
+        self.setIconSize(QtCore.QSize(90, 120))
+        self.setIcon(QtGui.QIcon("imgs/chara/" + chara + ".png"))
         self.setStyleSheet("background-color: rgb(20, 20, 20);"
                            "border: 1px solid gold;")
+        self.setObjectName("btn" + chara)
 
 
 class SaveStrategy(QWidget):

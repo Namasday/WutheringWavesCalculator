@@ -1,24 +1,24 @@
 <RCC>
   <qresource prefix="chara">
-    <file>imgs/chara/JINHSI.png</file>
-    <file>imgs/chara/BaiZhi.png</file>
-    <file>imgs/chara/ChiXia.png</file>
-    <file>imgs/chara/DanJin.png</file>
+    <file>imgs/chara/AALTO.png</file>
+    <file>imgs/chara/BAIZHI.png</file>
+    <file>imgs/chara/CALCHARO.png</file>
+    <file>imgs/chara/CHANGLI.png</file>
+    <file>imgs/chara/CHIXIA.png</file>
+    <file>imgs/chara/DANJIN.png</file>
     <file>imgs/chara/ENCORE.png</file>
-    <file>imgs/chara/JianXin.png</file>
-    <file>imgs/chara/JiYan.png</file>
-    <file>imgs/chara/KaKaLuo.png</file>
-    <file>imgs/chara/LingYang.png</file>
-    <file>imgs/chara/MoTeFei.png</file>
-    <file>imgs/chara/PiaoBoZheYanMie.png</file>
-    <file>imgs/chara/PiaoBoZheYanShe.png</file>
-    <file>imgs/chara/QiuShui.png</file>
+    <file>imgs/chara/JIANXIN.png</file>
+    <file>imgs/chara/JINHSI.png</file>
+    <file>imgs/chara/JIYAN.png</file>
+    <file>imgs/chara/LINGYANG.png</file>
+    <file>imgs/chara/MORTEFI.png</file>
+    <file>imgs/chara/ROVER.png</file>
     <file>imgs/chara/SANHUA.png</file>
-    <file>imgs/chara/TaoQi.png</file>
+    <file>imgs/chara/TAOQI.png</file>
     <file>imgs/chara/VERINA.png</file>
-    <file>imgs/chara/YangYang.png</file>
-    <file>imgs/chara/YinLin.png</file>
-    <file>imgs/chara/YuanWu.png</file>
+    <file>imgs/chara/YANGYANG.png</file>
+    <file>imgs/chara/YINLIN.png</file>
+    <file>imgs/chara/YUANWU.png</file>
   </qresource>
   <qresource prefix="icon">
     <file>imgs/ico/battle.png</file>

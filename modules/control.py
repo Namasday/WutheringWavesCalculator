@@ -9,9 +9,16 @@ from modules.constant import Setting
 
 class Control:
     def __init__(self, hwnd: int):
+        """
+        :param hwnd: 窗口句柄
+        """
         self.hwnd = hwnd
 
     def click(self, timelong: float = 0.015):
+        """
+        鼠标左键点击
+        :param timelong: 按下与释放间隔
+        """
         win32gui.PostMessage(
             self.hwnd, win32con.WM_LBUTTONDOWN, win32con.MK_LBUTTON, 0)  # 鼠标左键按下
         time.sleep(timelong)
@@ -19,6 +26,9 @@ class Control:
             self.hwnd, win32con.WM_LBUTTONUP, win32con.MK_LBUTTON, 0)  # 鼠标左键抬起
 
     def mouse_right(self):
+        """
+        鼠标右键点击
+        """
         win32gui.PostMessage(
             self.hwnd, win32con.WM_RBUTTONDOWN, win32con.MK_RBUTTON, 0)  # 鼠标左键按下
         time.sleep(0.015)
@@ -26,6 +36,11 @@ class Control:
             self.hwnd, win32con.WM_RBUTTONUP, win32con.MK_RBUTTON, 0)  # 鼠标左键抬起
 
     def tap(self, key, timelong: float = 0.015):
+        """
+        键盘按键点击
+        :param key: 键值
+        :param timelong: 按下与释放间隔
+        """
         if isinstance(key, str):
             key = ord(key.upper())
         win32gui.PostMessage(self.hwnd, win32con.WM_KEYDOWN, key, 0)
@@ -33,14 +48,23 @@ class Control:
         win32gui.PostMessage(self.hwnd, win32con.WM_KEYUP, key, 0)
 
     def click_press(self):
+        """
+        鼠标左键按下
+        """
         win32gui.PostMessage(
             self.hwnd, win32con.WM_LBUTTONDOWN, win32con.MK_LBUTTON, 0)  # 鼠标左键按下
 
     def click_release(self):
+        """
+        鼠标左键抬起
+        """
         win32gui.PostMessage(
             self.hwnd, win32con.WM_LBUTTONUP, win32con.MK_LBUTTON, 0)  # 鼠标左键抬起
 
     def space(self):
+        """
+        空格键点击
+        """
         win32gui.PostMessage(self.hwnd, win32con.WM_KEYDOWN, win32con.VK_SPACE, 0)
         time.sleep(0.015)
         win32gui.PostMessage(self.hwnd, win32con.WM_KEYUP, win32con.VK_SPACE, 0)
@@ -48,12 +72,19 @@ class Control:
 
 class KeyListener:
     def __init__(self, strategy, stopListening):
+        """
+        :param strategy: 策略
+        :param stopListening: 标志停止监听的事件
+        """
         self.strategy = strategy
         self.startKey = Key.f5
         self.running = threading.Event()
         self.stopListening = stopListening
 
     def battle(self):
+        """
+        战斗函数
+        """
         if Setting.hwnd == 0:
             Setting.hwnd = win32gui.FindWindow("UnrealWindow", "鸣潮  ")
             if Setting.hwnd == 0:
@@ -71,101 +102,97 @@ class KeyListener:
 
         while True:
             for oper in tactic:
-                if not self.running.is_set():
+                if not self.running.is_set():  # 判断是否停止监听
                     return
 
-                try:
-                    wait_time = float(oper)  # 如果是数字，等待时间
+                try:  # 如果是数字，等待时间
+                    wait_time = float(oper)
                     time.sleep(wait_time)
                     continue
-                except:
-                    pass
 
-                if len(oper) == 1:  # 如果只有一个字符，点击
-                    if oper == "a":  # 普攻
-                        control.click()
-                        continue
+                finally:
+                    if len(oper) == 1:
+                        if oper == "a":  # 普攻
+                            control.click()
 
-                    elif oper == "s":  # 跳跃
-                        control.space()
-                        continue
+                        elif oper == "s":  # 跳跃
+                            control.space()
 
-                    elif oper == "r":  # 共鸣解放
-                        if recognition.ending() == 1:  # 如果可以释放共鸣解放
-                            control.tap("r")
-                            while True:
-                                if recognition.ending() == 0:
-                                    break
-
-                            continue
+                        elif oper == "r":  # 共鸣解放
+                            if recognition.ending() == 1:  # 如果可以释放共鸣解放
+                                control.tap("r")
+                                while True:
+                                    if recognition.ending() == 0:
+                                        break
 
                         else:
-                            continue
+                            control.tap(oper)
 
-                    else:
-                        control.tap(oper)
                         continue
 
-                if "~" in oper:  # 重击或大招状态下重击
-                    operList: list = oper.split("~")
-                    click_time = float(operList[1])
-                    control.click(click_time)
-                    continue
-
-                if oper == "A-":
-                    control.click_press()
-                    continue
-
-                if oper == "A+":
-                    control.click_release()
-                    continue
-
-                if oper in ["c1", "c2", "c3"]:  # 切换人物
-                    control.tap(oper[1])
-                    if cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
-                        now = time.time()  # 变奏计时开始
-
-                    while True:
-                        reco = recognition.bianzou()
-                        if reco == 0:  # 变奏检测无效
-                            time.sleep(cdBianzou[oper])
-                            break
-                        elif reco == 1:  # 变奏结束
+                    elif len(oper) == 2:
+                        if oper in ["c1", "c2", "c3"]:  # 切换人物
+                            control.tap(oper[1])
                             if cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
-                                cdBianzou[oper] = time.time() - now  # 变奏计时结束
-                            break
-                        else:
-                            continue
+                                now = time.time()  # 变奏计时开始
 
-                    continue
+                            while True:  # 等待变奏结束
+                                reco = recognition.bianzou()
+                                if reco == 0:  # 变奏检测无效
+                                    time.sleep(cdBianzou[oper])
+                                    break
+                                elif reco == 1:  # 变奏结束
+                                    if cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
+                                        cdBianzou[oper] = time.time() - now  # 变奏计时结束
+                                    break
+                                else:
+                                    continue
 
-                if oper in ["ra", "sa"]:  # 大招状态下普攻或空中攻击
-                    control.click()
-                    continue
+                        elif oper == "A-":  # 重击按下
+                            control.click_press()
 
-                if "^" in oper:  # 测轴用，连按时间
-                    operList: list = oper.split("^")
-                    click_long = float(operList[1])
-                    now = time.time()
-                    while time.time() - now < click_long:
-                        control.click()
-                        time.sleep(0.05)
+                        elif oper == "A+":  # 重击释放
+                            control.click_release()
 
-                    continue
+                        elif oper in ["ra", "sa"]:  # 大招状态下普攻或空中攻击
+                            control.click()
 
-                if oper == "sh":
-                    control.mouse_right()
-                    continue
+                        elif oper == "sh":  # 闪避
+                            control.mouse_right()
+
+                        continue
+
+                    elif len(oper) > 2:
+                        if "~" in oper:  # 重击或大招状态下重击
+                            operList: list = oper.split("~")
+                            click_time = float(operList[1])
+                            control.click(click_time)
+
+                        elif "^" in oper:  # 测轴用，连按时间
+                            operList: list = oper.split("^")
+                            click_long = float(operList[1])
+                            now = time.time()
+                            while time.time() - now < click_long:
+                                control.click()
+                                time.sleep(0.05)
+
+                        continue
 
     def on_press(self, key):
-        if key == self.startKey:
-            if self.running.is_set():
+        """
+        比对按键输入
+        """
+        if key == self.startKey:  # 按下开始键
+            if self.running.is_set():  # 停止正在进行的操作
                 self.running.clear()
-            else:
+            else:  # 开始运行
                 self.running.set()
                 battle_thread = threading.Thread(target=self.battle)
                 battle_thread.start()
 
     def start(self):
+        """
+        开始监听
+        """
         with Listener(on_press=self.on_press) as listener:
             self.stopListening.wait()
