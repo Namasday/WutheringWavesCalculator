@@ -8,24 +8,14 @@ import cv2
 from PIL import Image
 from statistics import median
 
-
-def crop_skill(npimage):
+def crop_roi(npimage, roi):
     """
-    截取技能区域圆
+    截取感兴趣区域（ROI）
     ：param npimage: numpy图像数组
+    :param roi: 感兴趣区域
     """
-    x, y, w, h = Setting.areaSkill
-    npimage = npimage[y:y + h, x:x + w, :]
-    return npimage
-
-def crop_xiezou(npimage):
-    """
-    截取协奏能量区域圆
-    ：param npimage: numpy图像数组
-    """
-    x, y, w, h = Setting.areaXieZou
-    npimage = npimage[y:y + h, x:x + w, :]
-
+    x0, y0, x1, y1 = Setting.areaROI[roi]
+    npimage = npimage[y0:y1, x0:x1, :]
     return npimage
 
 def binarize_image_by_color(npimage, attribute):
@@ -46,33 +36,6 @@ def binarize_image_by_color(npimage, attribute):
     binary_img = np.where(mask == 255, 255, 0).astype(np.uint8)
 
     return binary_img
-
-def percent_xiezou(npimage, attribute):
-    """
-    计算协奏能量百分比
-    ：param npimage: numpy图像数组
-    ：param attribute: 人物属性
-    """
-    centerX = int(npimage.shape[0] / 2)  # 计算圆心x坐标
-    centerY = int(npimage.shape[1] / 2)  # 计算圆心y坐标
-    radiusIn = int(npimage.shape[0] / 2 * 0.9)  # 内圆半径
-    radiusOut = int(npimage.shape[0] / 2)  # 外圆半径
-
-    # 截取图像中心圆
-    y, x = np.mgrid[:npimage.shape[0], :npimage.shape[1]]  # 生成网格
-    distance = np.sqrt((x - centerX) ** 2 + (y - centerY) ** 2)  # 计算像素点到圆心的距离
-    mask = distance <= radiusIn  # 内圆掩码
-    npimage[mask] = 0
-    mask = distance > radiusOut  # 外圆掩码
-    npimage[mask] = 0
-
-    # 计数
-    count = np.sum(npimage) / 255
-    percent = count / Setting.totalXieZou[attribute]
-    if percent > 1:
-        percent = 1
-
-    return percent
 
 def screenshot():
     """
@@ -117,7 +80,7 @@ class Recognition:
         检测能否开启大招并等待
         """
         gameScreenshot = screenshot()  # 截图
-        imageEnding = gameScreenshot[1903:1964, 3561:3683, :]  # 截取共鸣解放数字区域
+        imageEnding = crop_roi(gameScreenshot, "Ending")  # 截取共鸣解放数字区域
         imageEnding = np.mean(imageEnding[..., :3], axis=2).astype(np.uint8)  # 截图转化为灰度图像
         threshold = 240  # 阈值
         imageEnding = (imageEnding > threshold).astype(np.uint8) * 255  # 二值化图像
@@ -138,8 +101,8 @@ class Recognition:
         检测
         """
         gameScreenshot = screenshot()  # 截图
-        imageSkill = gameScreenshot[1903:1964, 3138:3255, :]  # 截取共鸣技能数字区域
-        imageBaby = gameScreenshot[1903:1964, 3350:3471, :]  # 截取声骸技能数字区域
+        imageSkill = crop_roi(gameScreenshot, "Skill")  # 截取共鸣技能数字区域
+        imageBaby = crop_roi(gameScreenshot, "Baby")  # 截取声骸技能数字区域
 
         # 截图转化为灰度图像
         imageSkill = np.mean(imageSkill[..., :3], axis=2).astype(np.uint8)
@@ -169,37 +132,60 @@ class Recognition:
         else:
             return 2  # 未检测到败象素，循环检测
 
+    def energy_xiezou(self, attribute) -> float:
+        """
+        检测协奏能量百分比
+        :param attribute: 人物属性
+        :return: 百分比
+        """
+        gameScreenshot = screenshot()  # 截图
+        imageXieZou = crop_roi(gameScreenshot, "XieZou")  # 截取协奏能量区域
+        imageXieZou = binarize_image_by_color(imageXieZou, "xiezou" + attribute)  # 二值化图像
+
+        centerX = int(imageXieZou.shape[0] / 2)  # 计算圆心x坐标
+        centerY = int(imageXieZou.shape[1] / 2)  # 计算圆心y坐标
+        radiusIn = int(imageXieZou.shape[0] / 2 * 0.9)  # 内圆半径
+        radiusOut = int(imageXieZou.shape[0] / 2)  # 外圆半径
+
+        # 截取图像中心圆
+        y, x = np.mgrid[:imageXieZou.shape[0], :imageXieZou.shape[1]]  # 生成网格
+        distance = np.sqrt((x - centerX) ** 2 + (y - centerY) ** 2)  # 计算像素点到圆心的距离
+        mask = distance <= radiusIn  # 内圆掩码
+        imageXieZou[mask] = 0
+        mask = distance > radiusOut  # 外圆掩码
+        imageXieZou[mask] = 0
+
+        # 计数
+        count = np.sum(imageXieZou) / 255
+        percent = count / Setting.totalXieZou[attribute]
+        if percent > 1:
+            percent = 1
+
+        return percent
+
+    def energy_special(self, attribute):
+        """
+        检测特殊能量百分比
+        :param attribute: 人物属性
+        :return: 百分比
+        """
+        gameScreenshot = screenshot()  # 截图
+        imageSpecial = crop_roi(gameScreenshot, "Special")  # 截取特殊能量区域
+        imageSpecial = binarize_image_by_color(imageSpecial, "special" + attribute)  #
+        img = Image.fromarray(imageSpecial)
+        img.show()
+
+        contours, _ = cv2.findContours(imageSpecial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        count = len(contours)
+        percent = count / Setting.totalSpecial["Default"]
+        return percent
+
 
 recognition = Recognition()
 ocr = RapidOCR(det_limit_side_len=40)
 
 
-def find_midian(attribute):
-    """
-    测试颜色范围，寻找中位数
-    ：param attribute:人物属性
-    """
-    numlist = []
-    numMin = 1300
-    while True:
-        img = screenshot()
-        img = crop_xiezou(img)
-        img = binarize_image_by_color(img, attribute)
-        num = percent_xiezou(img, attribute)
-        numlist.append(num)
-        if num < numMin:
-            numMin = num
-        print(median(numlist))
-        print("最小值：" + str(numMin))
-
-
 # 测试颜色范围与取值
 if __name__ == "__main__":
-    attr = "DaoDian"
-    find_midian(attr)
-    # img = screenshot()
-    # img = crop_xiezou(img)
-    # img = binarize_image_by_color(img, attr)
-    # num = percent_xiezou(img, attr)
-    # img = Image.fromarray(img)
-    # img.show()
+    attr = "YanMie"
+    print(recognition.energy_special(attr))

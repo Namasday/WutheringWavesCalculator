@@ -14,43 +14,96 @@ class Setting:
     screenWidth = 3840
     screenHeight = 2160
 
-    areaXieZou = [1442, 1954, 105, 105]
+    areaROI = {
+        "Skill": [3138, 1903, 3255, 1964],  # 共鸣技能数字区域
+        "Baby": [3350, 1903, 3471, 1964],  # 声骸技能数字区域
+        "Ending": [3561, 1903, 3683, 1964],  # 共鸣解放数字区域
+        "XieZou": [1442, 1954, 1442 + 105, 1954 + 105],  # 协奏能量区域
+        "Special": [1628, 1999, 2176, 2013]
+    }
 
     # 协奏像素计数
     totalXieZou = {
         "ReRong": 1272,
         "LengNing": 1211,
         "QiDong": 1242,
-        "DaoDian": 1225,
+        "DaoDian": 1300,
         "YanShe": 1328,
         "YanMie": 1264
     }
 
+    # 协奏特殊能量计数
+    totalSpecial = {
+        "Default": 41,
+        "VERINA": 36,
+        "YANGYANG": 39,
+        "AALTO": 36
+    }
+
     # 颜色范围
     colorRange = {
-        "ReRong": [
+        # 热熔
+        "xiezouReRong": [
             [205, 107, 77],
             [220, 122, 92]
         ],
-        "LengNing": [
+        "specialReRong": [
+            [235, 89, 37],
+            [255, 114, 62]
+        ],
+
+        # 冷凝
+        "xiezouLengNing": [
             [63, 154, 217],
             [78, 169, 232]
         ],
-        "QiDong": [
+        "specialLengNing": [
+            [61, 191, 235],
+            [86, 216, 255]
+        ],
+
+        # 气动
+        "xiezouQiDong": [
             [74, 215, 156],
             [94, 235, 176]
         ],
-        "DaoDian": [
+        "specialQiDong": [
+            [73, 230, 175],
+            [103, 255, 205]
+        ],
+
+        # 导电
+        "xiezouDaoDian": [
             [156, 100, 222],
             [171, 115, 237]
         ],
-        "YanShe": [
+        "specialDaoDian": [
+            [203, 127, 220],
+            [238, 162, 255]
+        ],
+
+        # 衍射
+        "xiezouYanShe": [
             [214, 195, 100],
             [234, 215, 120]
         ],
-        "YanMie": [
+        "specialYanShe": [
+            [235, 231, 104],
+            [255, 255, 134]
+        ],
+        "specialJINHSI": [  # 今汐
+            [235, 222, 154],
+            [255, 242, 174]
+        ],
+
+        # 湮灭
+        "xiezouYanMie": [
             [199, 73, 149],
             [214, 88, 164]
+        ],
+        "specialYanMie": [
+            [215, 44, 95],
+            [255, 84, 135]
         ]
     }
 
