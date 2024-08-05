@@ -70,6 +70,9 @@ class Control:
         win32gui.PostMessage(self.hwnd, win32con.WM_KEYUP, win32con.VK_SPACE, 0)
 
 
+control = Control(Setting.hwnd)  # 控制
+
+
 class KeyListener:
     def __init__(self, strategy, stopListening):
         """
@@ -91,6 +94,7 @@ class KeyListener:
                 print("未找到游戏窗口")
                 return
 
+        global control
         control = Control(Setting.hwnd)  # 控制
         tactic = re.split(r'[,\n]', self.strategy)  # 策略转化为列表
 
@@ -119,11 +123,7 @@ class KeyListener:
                             control.space()
 
                         elif oper == "r":  # 共鸣解放
-                            if recognition.ending() == 1:  # 如果可以释放共鸣解放
-                                control.tap("r")
-                                while True:
-                                    if recognition.ending() == 0:
-                                        break
+                            confirm_r()
 
                         else:
                             control.tap(oper)
@@ -196,3 +196,17 @@ class KeyListener:
         """
         with Listener(on_press=self.on_press) as listener:
             self.stopListening.wait()
+
+
+def confirm_r():
+    """
+    确保释放了共鸣解放
+    """
+    if recognition.ending() == 1:  # 如果可以释放共鸣解放
+        control.tap("r")
+        while True:
+            if recognition.ending() == 0:  # 检测到共鸣解放cd中
+                return
+
+    else:
+        return

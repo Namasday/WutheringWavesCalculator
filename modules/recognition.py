@@ -1,13 +1,78 @@
-import time
-
 import win32gui
 import win32ui
-from PIL import Image
 from rapidocr_openvino import RapidOCR
 import numpy as np
 from modules.constant import Setting
 from ctypes import windll
+import cv2
+from PIL import Image
+from statistics import median
 
+
+def crop_skill(npimage):
+    """
+    截取技能区域圆
+    ：param npimage: numpy图像数组
+    """
+    x, y, w, h = Setting.areaSkill
+    npimage = npimage[y:y + h, x:x + w, :]
+    return npimage
+
+def crop_xiezou(npimage):
+    """
+    截取协奏能量区域圆
+    ：param npimage: numpy图像数组
+    """
+    x, y, w, h = Setting.areaXieZou
+    npimage = npimage[y:y + h, x:x + w, :]
+
+    return npimage
+
+def binarize_image_by_color(npimage, attribute):
+    """
+    以特定颜色范围对图像进行二值化处理。
+    ：param npimage: numpy图像数组
+    ：param attribute: 人物属性
+    """
+    # 读取图像
+    img = npimage
+    lower_bound = Setting.colorRange[attribute][0]
+    upper_bound = Setting.colorRange[attribute][1]
+
+    # 创建一个掩码，用于标记在指定颜色范围内的像素
+    mask = cv2.inRange(img, np.array(lower_bound, dtype=np.uint8), np.array(upper_bound, dtype=np.uint8))
+
+    # 创建二值图像
+    binary_img = np.where(mask == 255, 255, 0).astype(np.uint8)
+
+    return binary_img
+
+def percent_xiezou(npimage, attribute):
+    """
+    计算协奏能量百分比
+    ：param npimage: numpy图像数组
+    ：param attribute: 人物属性
+    """
+    centerX = int(npimage.shape[0] / 2)  # 计算圆心x坐标
+    centerY = int(npimage.shape[1] / 2)  # 计算圆心y坐标
+    radiusIn = int(npimage.shape[0] / 2 * 0.9)  # 内圆半径
+    radiusOut = int(npimage.shape[0] / 2)  # 外圆半径
+
+    # 截取图像中心圆
+    y, x = np.mgrid[:npimage.shape[0], :npimage.shape[1]]  # 生成网格
+    distance = np.sqrt((x - centerX) ** 2 + (y - centerY) ** 2)  # 计算像素点到圆心的距离
+    mask = distance <= radiusIn  # 内圆掩码
+    npimage[mask] = 0
+    mask = distance > radiusOut  # 外圆掩码
+    npimage[mask] = 0
+
+    # 计数
+    count = np.sum(npimage) / 255
+    percent = count / Setting.totalXieZou[attribute]
+    if percent > 1:
+        percent = 1
+
+    return percent
 
 def screenshot():
     """
@@ -45,7 +110,6 @@ def screenshot():
     win32gui.ReleaseDC(Setting.hwnd, hwndDC)
 
     return im  # 返回截取到的图像
-
 
 class Recognition:
     def ending(self) -> int:
@@ -108,3 +172,34 @@ class Recognition:
 
 recognition = Recognition()
 ocr = RapidOCR(det_limit_side_len=40)
+
+
+def find_midian(attribute):
+    """
+    测试颜色范围，寻找中位数
+    ：param attribute:人物属性
+    """
+    numlist = []
+    numMin = 1300
+    while True:
+        img = screenshot()
+        img = crop_xiezou(img)
+        img = binarize_image_by_color(img, attribute)
+        num = percent_xiezou(img, attribute)
+        numlist.append(num)
+        if num < numMin:
+            numMin = num
+        print(median(numlist))
+        print("最小值：" + str(numMin))
+
+
+# 测试颜色范围与取值
+if __name__ == "__main__":
+    attr = "DaoDian"
+    find_midian(attr)
+    # img = screenshot()
+    # img = crop_xiezou(img)
+    # img = binarize_image_by_color(img, attr)
+    # num = percent_xiezou(img, attr)
+    # img = Image.fromarray(img)
+    # img.show()
