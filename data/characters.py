@@ -1,10 +1,13 @@
 import os, json
 
-datapath = 'json/'  # 人物json文件路径
+# 定义路径
+current_file_path = os.path.abspath(__file__)
+current_dir = os.path.dirname(current_file_path)
+datapath = os.path.join(current_dir, 'json/')  # 人物json文件路径
 
 # 人物名列表
-listChara = os.listdir(datapath)
-listChara = [file[:-5] for file in listChara]
+listCharas = os.listdir(datapath)
+listCharas = [file[:-5] for file in listCharas]
 
 
 def open_json(charaName):
@@ -66,5 +69,8 @@ def create_instances(dictClass):
     return dictCharacters
 
 
-dictCharaClasses = create_classes_with_metaclass(listChara)  # 创建所有人物类字典
+dictCharaClasses = create_classes_with_metaclass(listCharas)  # 创建所有人物类字典
 dictCharas = create_instances(dictCharaClasses)  # 创建所有人物实例字典
+
+if __name__ == '__main__':
+    print(dictCharas['JINHSI'].data['attack'])

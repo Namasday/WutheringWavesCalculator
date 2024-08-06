@@ -1,7 +1,6 @@
 import win32gui
 import json
 
-
 with open("config.json", "r") as f:
     config = json.load(f)
 
@@ -102,6 +101,7 @@ class Setting:
     }
 
     # 人物按钮预设
+    calcuChara = config["calcuChara"]
     hezhouChara_1 = config["hezhouChara_1"]
     hezhouChara_2 = config["hezhouChara_2"]
     hezhouChara_3 = config["hezhouChara_3"]

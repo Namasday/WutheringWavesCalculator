@@ -3,17 +3,17 @@ import os
 import sys
 import threading
 
-from PyQt6.QtGui import QMouseEvent, QFont, QCloseEvent
+from PyQt6.QtGui import QFont, QCloseEvent
 from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QWidget, QGridLayout, QDialog, QMainWindow
 from PyQt6 import QtCore, QtGui
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.uic import loadUi
 
 from modules.constant import Setting
 from modules.control import KeyListener
 import re
 
-from data.characters import dictChara, chara_list
+from data.characters import dictCharas
 import rcc_resources
 
 import warnings
@@ -28,8 +28,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.initUI()
 
-        self.chara = dictChara['Jinhsi']
-        self.set_data(self.chara)
+        # 初始化计算人物按钮属性
+        self.btnChara.setIcon(QtGui.QIcon("imgs/chara/" + Setting.calcuChara + ".png"))
+        self.btnChara.setProperty("chara", Setting.calcuChara)
+        self.set_data(self.btnChara.property("chara"))
 
         # 初始化合轴人物按钮属性
         self.btnChara_1.setIcon(QtGui.QIcon("imgs/chara/" + Setting.hezhouChara_1 + ".png"))
@@ -105,6 +107,7 @@ class MainWindow(QMainWindow):
         """
         strategy = self.strategy.toPlainText().split("\n")
         data = {
+            'calcuChara': self.btnChara.property("chara"),
             'hezhouChara_1': self.btnChara_1.property("chara"),
             'hezhouChara_2': self.btnChara_2.property("chara"),
             'hezhouChara_3': self.btnChara_3.property("chara"),
@@ -188,46 +191,47 @@ class MainWindow(QMainWindow):
         self.selectCharaUI.move(position.x() + 141, position.y())
         self.selectCharaUI.show()
 
-    def change_chara(self, btn, chara):
+    def change_chara(self, btn, charaName):
         """
         切换按钮人物
         """
         # 合轴界面如果有相同的人物，则切换
         hezhouBtnList = [self.btnChara_1, self.btnChara_2, self.btnChara_3]
-        charaBefore = btn.property("chara")
+        charaNameBefore = btn.property("chara")
         if btn in hezhouBtnList:
             for button in hezhouBtnList:
                 if button == btn:
                     continue
                 else:
-                    if button.property("chara") == chara:
-                        imagePathBefore = "imgs/chara/" + charaBefore + ".png"
+                    if button.property("chara") == charaName:
+                        imagePathBefore = "imgs/chara/" + charaNameBefore + ".png"
                         button.setIcon(QtGui.QIcon(imagePathBefore))
-                        button.setProperty("chara", charaBefore)
+                        button.setProperty("chara", charaNameBefore)
                         break
 
-        imagePath = "imgs/chara/" + chara + ".png"
+        imagePath = "imgs/chara/" + charaName + ".png"
         btn.setIcon(QtGui.QIcon(imagePath))
-        btn.setProperty("chara", chara)
+        btn.setProperty("chara", charaName)
 
-    def set_data(self, chara):
+    def set_data(self, charaName):
         """
         切换人物时设置人物数据
         """
-        self.lcdNumAttack.setProperty("value", chara.attack)
-        self.lcdNumDefense.setProperty("value", chara.defense)
-        self.lcdNumHealth.setProperty("value", chara.health)
-        self.lcdNumCritRate.setProperty("value", chara.crit_rate)
-        self.lcdNumCritDamage.setProperty("value", chara.crit_damage)
-        self.lcdNumEfficiency.setProperty("value", chara.efficiency)
-        self.lcdNumAttackRate.setProperty("value", chara.attack_rate)
-        self.lcdNumADE.setProperty("value", chara.attribute_damage_enhancement)
-        self.lcdNumGDE.setProperty("value", chara.general_damage_enhancement)
-        self.lcdNumHDE.setProperty("value", chara.heavy_damage_enhancement)
-        self.lcdNumSDE.setProperty("value", chara.skill_damage_enhancement)
-        self.lcdNumEDE.setProperty("value", chara.ending_damage_enhancement)
+        chara = dictCharas[charaName]
+        self.lcdNumAttack.setProperty("value", chara.data['attack'])
+        self.lcdNumDefense.setProperty("value", chara.data['defense'])
+        self.lcdNumHealth.setProperty("value", chara.data['health'])
+        self.lcdNumCritRate.setProperty("value", chara.data['crit_rate'])
+        self.lcdNumCritDamage.setProperty("value", chara.data['crit_damage'])
+        self.lcdNumEfficiency.setProperty("value", chara.data['efficiency'])
+        self.lcdNumAttackRate.setProperty("value", chara.data['attack_rate'])
+        self.lcdNumADE.setProperty("value", chara.data['attribute_damage_enhancement'])
+        self.lcdNumGDE.setProperty("value", chara.data['general_damage_enhancement'])
+        self.lcdNumHDE.setProperty("value", chara.data['heavy_damage_enhancement'])
+        self.lcdNumSDE.setProperty("value", chara.data['skill_damage_enhancement'])
+        self.lcdNumEDE.setProperty("value", chara.data['ending_damage_enhancement'])
         self.textSP.setProperty("text",
-                                "<html><head/><body><p><span style=\" color:#ffffff;\">备注：" + chara.sp + "</span></p></body></html>")
+                                "<html><head/><body><p><span style=\" color:#ffffff;\">备注：" + chara.data['sp'] + "</span></p></body></html>")
 
     def change_tab(self, index):
         """
@@ -262,6 +266,10 @@ class Worker(QThread):
         self.stopListening.set()
 
 
+listBtnCharas = os.listdir("imgs/chara")
+listBtnCharas = [file[:-4] for file in listBtnCharas]
+
+
 class SelectCharaUI(QWidget):
     def __init__(self, btn, parent=None):
         super().__init__(parent)
@@ -273,14 +281,14 @@ class SelectCharaUI(QWidget):
         self.mainLayout = QGridLayout()
 
         # 循环创建人物按钮
-        for index, charaName in enumerate(chara_list):
+        for index, charaName in enumerate(listBtnCharas):
             row = index // 8
             col = index % 8
             self.pushButton = CharaButton(charaName)
             self.pushButton.clicked.connect(lambda checked, chara=charaName: self.button_clicked(chara))
             self.mainLayout.addWidget(self.pushButton, row, col)
 
-        lenth = len(chara_list)
+        lenth = len(listBtnCharas)
         if lenth % 8 == 0:
             row_max = lenth // 8
         else:
@@ -300,24 +308,25 @@ class SelectCharaUI(QWidget):
 
 
 class CharaButton(QPushButton):
-    def __init__(self, chara):
+    def __init__(self, charaName):
         super().__init__()
         self.resize(92, 122)
         self.setIconSize(QtCore.QSize(90, 120))
-        self.setIcon(QtGui.QIcon("imgs/chara/" + chara + ".png"))
+        self.setIcon(QtGui.QIcon("imgs/chara/" + charaName + ".png"))
         self.setStyleSheet("background-color: rgb(20, 20, 20);"
                            "border: 1px solid gold;")
-        self.setObjectName("btn" + chara)
+        self.setObjectName("btn" + charaName)
 
 
 class SaveStrategy(QWidget):
     def __init__(self, strategy, filename, parent=None):
-        super().__init__()
+        super().__init__(parent)
         self.strategy = strategy
         self.parent = parent
         self.initUI()
 
         self.name.setText(filename)
+        self.move_to_center()
         self.bind()
 
     def initUI(self):
@@ -339,6 +348,18 @@ class SaveStrategy(QWidget):
 
         # 关闭按钮
         self.btnDestroySubWindow.clicked.connect(self.close)
+
+    def move_to_center(self):
+        """
+        将窗口移动到屏幕中心
+        """
+        sizeParent = [self.parent.width(), self.parent.height()]
+        sizeself = [self.width(), self.height()]
+        poschange = [
+            int((sizeParent[0] - sizeself[0]) / 2),
+            int((sizeParent[1] - sizeself[1]) / 2),
+        ]
+        self.move(poschange[0], poschange[1])
 
     def on_return_pressed(self):
         """
@@ -368,9 +389,10 @@ class SaveStrategy(QWidget):
 
 class SaveConfirm(QDialog):
     def __init__(self, parent=None):
-        super().__init__()
+        super().__init__(parent)
         self.parent = parent
         self.initUI()
+        self.move_to_center()
         self.bind()
 
     def initUI(self):
@@ -383,6 +405,18 @@ class SaveConfirm(QDialog):
     def bind(self):
         self.btnYes.clicked.connect(self.write_file)
         self.btnNo.clicked.connect(self.close)
+
+    def move_to_center(self):
+        """
+        将窗口移动到屏幕中心
+        """
+        sizeParent = [self.parent.width(), self.parent.height()]
+        sizeself = [self.width(), self.height()]
+        poschange = [
+            int((sizeParent[0] - sizeself[0]) / 2),
+            int((sizeParent[1] - sizeself[1]) / 2),
+        ]
+        self.move(poschange[0], poschange[1])
 
     def write_file(self):
         self.parent.widgetSaveStrategy.write_file()

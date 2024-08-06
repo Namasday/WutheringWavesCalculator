@@ -5,8 +5,8 @@ import numpy as np
 from modules.constant import Setting
 from ctypes import windll
 import cv2
-from PIL import Image
-from statistics import median
+from data.characters import dictCharas
+
 
 def crop_roi(npimage, roi):
     """
@@ -132,15 +132,15 @@ class Recognition:
         else:
             return 2  # 未检测到败象素，循环检测
 
-    def energy_xiezou(self, attribute) -> float:
+    def energy_xiezou(self, charaName: str) -> float:
         """
         检测协奏能量百分比
-        :param attribute: 人物属性
+        :param charaName: 人物名字
         :return: 百分比
         """
         gameScreenshot = screenshot()  # 截图
         imageXieZou = crop_roi(gameScreenshot, "XieZou")  # 截取协奏能量区域
-        cr = Setting.crXieZou[attribute]  # 获取颜色范围
+        cr = Setting.crXieZou[dictCharas[charaName].data['attribute']]  # 获取颜色范围
         imageXieZou = binarize_image_by_color(imageXieZou, cr)  # 二值化图像
 
         centerX = int(imageXieZou.shape[0] / 2)  # 计算圆心x坐标
@@ -158,27 +158,40 @@ class Recognition:
 
         # 计数
         count = np.sum(imageXieZou) / 255
-        percent = count / Setting.totalXieZou[attribute]
+        percent = count / Setting.totalXieZou[dictCharas[charaName].data['attribute']]
         if percent > 1:
             percent = 1
 
         return percent
 
-    def energy_special(self, attribute):
+    def energy_special(self, charaName: str):
         """
         检测特殊能量百分比
-        :param attribute: 人物属性
+        :param charaName: 人物名字
         :return: 百分比
         """
         gameScreenshot = screenshot()  # 截图
         imageSpecial = crop_roi(gameScreenshot, "Special")  # 截取特殊能量区域
-        cr = Setting.crSpecial[attribute]  # 获取颜色范围
+
+        # 获取颜色范围
+        try:
+            cr = Setting.crSpecial[charaName]
+        except:
+            cr = Setting.crSpecial[dictCharas[charaName].data['attribute']]
+
         imageSpecial = binarize_image_by_color(imageSpecial, cr)  # 二值化图像
 
         # 计数
         contours, _ = cv2.findContours(imageSpecial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 查找像素块
         count = len(contours)
-        percent = count / Setting.totalSpecial["Default"]
+
+        # 计算百分比
+        try:
+            total = Setting.totalSpecial[charaName]
+        except:
+            total = Setting.totalSpecial["Default"]
+
+        percent = count / total
         return percent
 
     def attribute(self) -> str:

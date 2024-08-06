@@ -87,6 +87,8 @@ class KeyListener:
                           "c2": 1,
                           "c3": 1}
         self.attribute = None  # 当前人物属性
+        self.numChara = 1  # 当前人物序号（1，2，3）
+        self.listCharaName = []  # 声明人物名称列表
 
     def battle(self):
         """
@@ -102,15 +104,11 @@ class KeyListener:
         control = Control(Setting.hwnd)  # 控制
 
         from main import window
-        listCharaName = [
+        self.listCharaName = [
             "",
-            window.btnChara_1.property("text"),
-            window.btnChara_2.property("text"),
-            window.btnChara_3.property("text"),
-        ]
-        listCharaAttr = [
-            ""
-
+            window.btnChara_1.property("chara"),
+            window.btnChara_2.property("chara"),
+            window.btnChara_3.property("chara"),
         ]
 
         tactic = re.split(r'[,\n]', self.strategy)  # 策略转化为列表
@@ -150,6 +148,8 @@ class KeyListener:
                     control.tap(oper[1])
                     if self.cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
                         now = time.time()  # 变奏计时开始
+
+                    self.numChara = int(oper[1])  # 更新人物序号
 
                     while True:  # 等待变奏结束
                         reco = recognition.bianzou()
@@ -196,7 +196,8 @@ class KeyListener:
                     tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
                     tacticInside = tacticInside.split(".")  # 拆分操作策略
 
-                    self.loop_battle_inside(tacticInside, energyGoal, "xiezou")
+                    charaNameNow = self.listCharaName[self.numChara]  # 当前角色名
+                    self.loop_battle_inside(tacticInside, energyGoal, "xiezou", charaNameNow)
 
                 elif "eSP" in oper:
                     listOper = oper.split(">eSP")
@@ -205,16 +206,18 @@ class KeyListener:
                     tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
                     tacticInside = tacticInside.split(".")  # 拆分操作策略
 
-                    self.loop_battle_inside(tacticInside, energyGoal, "special")
+                    charaNameNow = self.listCharaName[self.numChara]  # 当前角色名
+                    self.loop_battle_inside(tacticInside, energyGoal, "special", charaNameNow)
 
-    def loop_battle_inside(self, strategy: list, energy: float, goal: str):
+    def loop_battle_inside(self, strategy: list, energygoal: float, energytype: str, charaName):
         """
         战斗策略的枚举循环
         ：param strategy: 策略列表
-        ：param energy: 目标协奏能量百分比
-        ：param goal: 目标能量类型，[xiezou, special]
+        ：param energygoal: 目标协奏能量百分比
+        ：param energytype: 目标能量类型，[xiezou, special]
+        ：param chara: 当前角色
         """
-        reco_dic = {
+        dicReco = {
             "xiezou": recognition.energy_xiezou,
             "special": recognition.energy_special,
         }
@@ -223,7 +226,7 @@ class KeyListener:
             if not self.running.is_set():  # 判断是否停止动作
                 return
 
-            if reco_dic[goal]() >= energy:  # 检测目标能量是否达标
+            if dicReco[energytype](charaName) >= energygoal:  # 检测目标能量是否达标
                 return
 
             self.check_oper(oper)
