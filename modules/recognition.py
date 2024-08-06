@@ -171,11 +171,10 @@ class Recognition:
         """
         gameScreenshot = screenshot()  # 截图
         imageSpecial = crop_roi(gameScreenshot, "Special")  # 截取特殊能量区域
-        imageSpecial = binarize_image_by_color(imageSpecial, "special" + attribute)  #
-        img = Image.fromarray(imageSpecial)
-        img.show()
+        imageSpecial = binarize_image_by_color(imageSpecial, "special" + attribute)  # 二值化图像
 
-        contours, _ = cv2.findContours(imageSpecial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # 计数
+        contours, _ = cv2.findContours(imageSpecial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 查找像素块
         count = len(contours)
         percent = count / Setting.totalSpecial["Default"]
         return percent

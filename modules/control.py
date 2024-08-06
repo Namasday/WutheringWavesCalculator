@@ -128,8 +128,6 @@ class KeyListener:
                         else:
                             control.tap(oper)
 
-                        continue
-
                     elif len(oper) == 2:
                         if oper in ["c1", "c2", "c3"]:  # 切换人物
                             control.tap(oper[1])
@@ -160,23 +158,53 @@ class KeyListener:
                         elif oper == "sh":  # 闪避
                             control.mouse_right()
 
-                        continue
-
                     elif len(oper) > 2:
-                        if "~" in oper:  # 重击或大招状态下重击
-                            operList: list = oper.split("~")
-                            click_time = float(operList[1])
+                        if "A~" in oper or "rA~" in oper:  # 重击或大招状态下重击
+                            listOper = oper.split("~")
+                            click_time = float(listOper[1])
                             control.click(click_time)
 
-                        elif "^" in oper:  # 测轴用，连按时间
-                            operList: list = oper.split("^")
-                            click_long = float(operList[1])
+                        elif "a^" in oper:  # 测轴用，连按时间
+                            listOper = oper.split("^")
+                            click_long = float(listOper[1])
                             now = time.time()
                             while time.time() - now < click_long:
                                 control.click()
                                 time.sleep(0.05)
 
-                        continue
+                        elif "eXZ" in oper:  # 循环至协奏能量达标
+                            if ">" in oper:
+                                listOper = oper.split(">eXZ")
+                                tacticInside = listOper[0]  # 循环操作策略
+                                energyGoal = float(listOper[1])  # 目标协奏能量百分比
+                                tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
+                                tacticInside = tacticInside.split(".")  # 拆分操作策略
+
+                                for operInside in tacticInside:
+                                    if not self.running.is_set():  # 判断是否停止监听
+                                        return
+
+                                    if recognition.energy_xiezou() >= energyGoal:  # 检测协奏能量是否达标
+                                        break
+
+                                    control.tap(operInside)
+
+                            if "<" in oper:
+                                listOper = oper.split("<")
+                                tacticInside = listOper[-1]  # 循环操作策略
+                                energyGoal = float(listOper[0].split("eXZ")[-1])  # 目标协奏能量百分比
+                                tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
+                                tacticInside = tacticInside.split(".")  # 拆分操作策略
+
+                                for operInside in tacticInside:
+                                    if not self.running.is_set():  # 判断是否停止监听
+                                        return
+
+                                    if recognition.energy_xiezou() >= energyGoal:  # 检测协奏能量是否达标
+                                        break
+
+                                    control.tap(operInside)
+
 
     def on_press(self, key):
         """
@@ -207,6 +235,3 @@ def confirm_r():
         while True:
             if recognition.ending() == 0:  # 检测到共鸣解放cd中
                 return
-
-    else:
-        return
