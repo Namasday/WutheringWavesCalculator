@@ -74,7 +74,7 @@ control = Control(Setting.hwnd)  # 控制
 
 
 class KeyListener:
-    def __init__(self, strategy, stopListening):
+    def __init__(self, strategy, stopListening, listCharaName):
         """
         :param strategy: 策略
         :param stopListening: 标志停止监听的事件
@@ -88,7 +88,7 @@ class KeyListener:
                           "c3": 1}
         self.attribute = None  # 当前人物属性
         self.numChara = 1  # 当前人物序号（1，2，3）
-        self.listCharaName = []  # 声明人物名称列表
+        self.listCharaName = listCharaName  # 人物名称列表
 
     def battle(self):
         """
@@ -102,15 +102,6 @@ class KeyListener:
 
         global control
         control = Control(Setting.hwnd)  # 控制
-
-        from main import window
-        self.listCharaName = [
-            "",
-            window.btnChara_1.property("chara"),
-            window.btnChara_2.property("chara"),
-            window.btnChara_3.property("chara"),
-        ]
-
         tactic = re.split(r'[,\n]', self.strategy)  # 策略转化为列表
 
         while True:
@@ -118,6 +109,16 @@ class KeyListener:
                 return
 
             self.loop_battle(tactic)
+
+    def confirm_r(self):
+        """
+        确保释放了共鸣解放
+        """
+        if recognition.ending() == 1:  # 如果可以释放共鸣解放
+            while True:
+                control.tap("r")  # 狂按r释放共鸣解放
+                if recognition.ending() == 0:  # 检测到共鸣解放cd中
+                    return
 
     def check_oper(self, oper):
         """
@@ -138,13 +139,15 @@ class KeyListener:
                     control.space()
 
                 elif oper == "r":  # 共鸣解放
-                    confirm_r()
+                    self.confirm_r()
 
                 else:
                     control.tap(oper)
 
             elif len(oper) == 2:
                 if oper in ["c1", "c2", "c3"]:  # 切换人物
+                    charaNameBefore = self.listCharaName[self.numChara]  # 当前角色名
+                    recognition.energy_xiezou()
                     control.tap(oper[1])
                     if self.cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
                         now = time.time()  # 变奏计时开始
@@ -194,7 +197,7 @@ class KeyListener:
                     tacticInside = listOper[0]  # 循环操作策略
                     energyGoal = float(listOper[1])  # 目标协奏能量百分比
                     tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
-                    tacticInside = tacticInside.split(".")  # 拆分操作策略
+                    tacticInside = tacticInside.split(";")  # 拆分操作策略
 
                     charaNameNow = self.listCharaName[self.numChara]  # 当前角色名
                     self.loop_battle_inside(tacticInside, energyGoal, "xiezou", charaNameNow)
@@ -204,12 +207,12 @@ class KeyListener:
                     tacticInside = listOper[0]  # 循环操作策略
                     energyGoal = float(listOper[1])  # 目标协奏能量百分比
                     tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
-                    tacticInside = tacticInside.split(".")  # 拆分操作策略
+                    tacticInside = tacticInside.split(";")  # 拆分操作策略
 
                     charaNameNow = self.listCharaName[self.numChara]  # 当前角色名
                     self.loop_battle_inside(tacticInside, energyGoal, "special", charaNameNow)
 
-    def loop_battle_inside(self, strategy: list, energygoal: float, energytype: str, charaName):
+    def loop_battle_inside(self, strategy: list, energygoal: float, energytype: str, charaName: str):
         """
         战斗策略的枚举循环
         ：param strategy: 策略列表
@@ -222,14 +225,16 @@ class KeyListener:
             "special": recognition.energy_special,
         }
 
-        for oper in strategy:
-            if not self.running.is_set():  # 判断是否停止动作
-                return
+        while True:
+            for oper in strategy:
+                if not self.running.is_set():  # 判断是否停止动作
+                    return
 
-            if dicReco[energytype](charaName) >= energygoal:  # 检测目标能量是否达标
-                return
+                reco = dicReco[energytype](charaName)  # 检测目标能量
+                if reco >= energygoal:  # 检测目标能量是否达标
+                    return
 
-            self.check_oper(oper)
+                self.check_oper(oper)
 
     def loop_battle(self, strategy: list):
         """
@@ -260,14 +265,3 @@ class KeyListener:
         """
         with Listener(on_press=self.on_press) as listener:
             self.stopListening.wait()
-
-
-def confirm_r():
-    """
-    确保释放了共鸣解放
-    """
-    if recognition.ending() == 1:  # 如果可以释放共鸣解放
-        control.tap("r")
-        while True:
-            if recognition.ending() == 0:  # 检测到共鸣解放cd中
-                return

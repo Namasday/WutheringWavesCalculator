@@ -1,5 +1,6 @@
 import win32gui
 import win32ui
+from PIL import Image
 from rapidocr_openvino import RapidOCR
 import numpy as np
 from modules.constant import Setting
@@ -194,16 +195,26 @@ class Recognition:
         percent = count / total
         return percent
 
-    def attribute(self) -> str:
+    def chara_rank(self):
         """
-        检测当前人物属性
+        截图ocr识别当前的人物序号（1，2，3）
+        :return: 人物序号
         """
         gameScreenshot = screenshot()  # 截图
-        imageXieZou = crop_roi(gameScreenshot, "XieZou")  # 截取协奏能量区域
-        for attr, cr in Setting.crXieZou:
-            imageXieZou = binarize_image_by_color(imageXieZou, cr)  # 二值化图像
-            if 255 in imageXieZou:
-                return attr
+        listArea = ["CharaRank_1", "CharaRank_2", "CharaRank_3"]
+        threshold = 250
+        for index, value in enumerate(listArea):
+            imageCharaRank = crop_roi(gameScreenshot, value)  # 截取人物序号区域
+            imageCharaRank = np.mean(imageCharaRank[..., :3], axis=2).astype(np.uint8)  # 截图转化为灰度图像
+            imageCharaRank = (imageCharaRank > threshold).astype(np.uint8) * 255
+            # image = Image.fromarray(imageCharaRank)
+            # image.show()
+            if 255 in imageCharaRank:
+                continue
+            else:
+                return index + 1  # 检测到黑像素，结束变奏
+
+        return self.chara_rank()
 
 
 recognition = Recognition()
@@ -212,5 +223,4 @@ ocr = RapidOCR(det_limit_side_len=40)
 
 # 测试颜色范围与取值
 if __name__ == "__main__":
-    attr = "YanMie"
-    print(recognition.energy_special(attr))
+    print(recognition.chara_rank())

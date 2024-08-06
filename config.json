@@ -4,7 +4,7 @@
     "hezhouChara_2": "SANHUA",
     "hezhouChara_3": "VERINA",
     "strategy": [
-        "c3,r,e,0.5,s,0.3,a,0.3,a,0.5,a",
+        "c3,r,e,0.5,(a;r;e)>eXZ0.8,q,s,0.3,(a;0.05)>eXZ1",
         "c2,a^1.23,A-,0.6,r,A+,0.6,e",
         "c1,e,0.2",
         "c3,a^1,q",

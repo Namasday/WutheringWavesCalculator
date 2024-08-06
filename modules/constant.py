@@ -1,7 +1,14 @@
+import os
+
 import win32gui
 import json
 
-with open("config.json", "r") as f:
+# 定义路径
+current_file_path = os.path.abspath(__file__)
+current_dir = os.path.dirname(current_file_path)
+configpath = os.path.join(current_dir, '../')  # 人物json文件路径
+
+with open(configpath + "config.json", "r") as f:
     config = json.load(f)
 
 
@@ -18,7 +25,12 @@ class Setting:
         "Baby": [3350, 1903, 3471, 1964],  # 声骸技能数字区域
         "Ending": [3561, 1903, 3683, 1964],  # 共鸣解放数字区域
         "XieZou": [1442, 1954, 1442 + 105, 1954 + 105],  # 协奏能量区域
-        "Special": [1628, 1999, 2176, 2013]
+        "Special": [1628, 1999, 2176, 2013],  # 特殊能量区域
+
+        # 人物序号区域
+        "CharaRank_1": [3470, 424, 3470 + 38, 424 + 38],
+        "CharaRank_2": [3470, 689, 3470 + 38, 689 + 38],
+        "CharaRank_3": [3470, 953, 3470 + 38, 953 + 38]
     }
 
     # 协奏像素计数

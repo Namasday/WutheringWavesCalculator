@@ -209,6 +209,8 @@ class MainWindow(QMainWindow):
                         button.setProperty("chara", charaNameBefore)
                         break
 
+            self.reset_thread()
+
         imagePath = "imgs/chara/" + charaName + ".png"
         btn.setIcon(QtGui.QIcon(imagePath))
         btn.setProperty("chara", charaName)
@@ -247,6 +249,12 @@ class Worker(QThread):
     def __init__(self, parent):
         super().__init__()
         self.strategy = parent.strategy.toPlainText()
+        self.listCharaName = [
+            "",
+            parent.btnChara_1.property("chara"),
+            parent.btnChara_2.property("chara"),
+            parent.btnChara_3.property("chara"),
+        ]
         self.stopListening = threading.Event()
         self.listener = None
 
@@ -256,7 +264,7 @@ class Worker(QThread):
         """
         启动监听
         """
-        self.listener = KeyListener(self.strategy, self.stopListening)
+        self.listener = KeyListener(self.strategy, self.stopListening, self.listCharaName)
         self.listener.start()
 
     def stop(self):
