@@ -1,77 +1,70 @@
 import os, json
 
-chara_dict_path = 'data/json/'  # 人物json文件路径
-chara_list_path = 'imgs/chara'  # 人物图片路径
+datapath = 'json/'  # 人物json文件路径
+
+# 人物名列表
+listChara = os.listdir(datapath)
+listChara = [file[:-5] for file in listChara]
 
 
-class Characters:
-    def __init__(self, chara):
-        self.name = chara['name']
-        self.attribute = chara['attribute']
-        self.weapon_type = chara['weapon_type']
-        self.attack = chara['attack']
-        self.defense = chara['defense']
-        self.health = chara['health']
-        self.crit_rate = chara['crit_rate']['value']
-        self.crit_damage = chara['crit_damage']['value']
-        self.efficiency = chara['efficiency']['value']
-        self.attack_rate = chara['attack_rate']['value']
-        self.attribute_damage_enhancement = chara['attribute_damage_enhancement']['value']
-        self.general_damage_enhancement = chara['general_damage_enhancement']['value']
-        self.heavy_damage_enhancement = chara['heavy_damage_enhancement']['value']
-        self.skill_damage_enhancement = chara['skill_damage_enhancement']['value']
-        self.ending_damage_enhancement = chara['ending_damage_enhancement']['value']
-        self.star = chara['star']
-        self.sp = chara['sp']
+def open_json(charaName):
+    """
+    打开json文件
+    :param charaName: 人物名字
+    :return: 返回json数据
+    """
+    with open(datapath + charaName + ".json", 'r', encoding='utf-8') as file:
+        data = json.load(file)
+    return data
 
 
-class PiaoBoZheYanShe(Characters):
-    """指定人物"""
-    def __init__(self):
-        with open(chara_dict_path + "PiaoBoZheYanShe.json", 'r', encoding='utf-8') as file:
-            chara = json.load(file)
-        super().__init__(chara)
+class MetaClass(type):
+    """
+    自定义元类，用以批量创建人物类
+    """
+    def __new__(cls, name, bases, dct):
+        """
+        定义类的实例属性和方法
+        """
+        # 动态定义属性
+        data = open_json(name)
+        dct['data'] = data  # 为所有通过此元类创建的类添加一个属性
 
-    """计算函数"""
-    def calculate(self):
-        pass
+        # 动态定义实例方法
+        def calculate(self):
+            print(f"This is a custom method for {name}. Data: {self.data}")
 
+        # 将自定义方法添加到类的字典中
+        dct['calculate'] = calculate
 
-class Jinhsi(Characters):
-    """指定人物"""
-    def __init__(self):
-        with open(chara_dict_path + "Jinhsi.json", 'r', encoding='utf-8') as file:
-            chara = json.load(file)
-        super().__init__(chara)
-
-    """计算函数"""
-    def calculate(self, data):
-        attack = data['attack'] * (1 + data['attack_rate']/100)
-        result = attack
-        return result
+        return super().__new__(cls, name, bases, dct)
 
 
-# 通过值寻找键
-def find(dictionary, value):
-    for key, val in dictionary.items():
-        if val == value:
-            return key
-    return None  # 如果找不到匹配的值，返回None
+def create_classes_with_metaclass(names):
+    """
+    批量创建类
+    ：param names: 类名列表
+    ：return: 返回类字典
+    """
+    classes = {}
+    for name in names:
+        cls = MetaClass(name, (object,), {})
+        classes[name] = cls
+    return classes
 
 
-# 通过字符串寻找类
-def create_instance_by_name(class_name):
-    cls = globals().get(class_name)
-    if cls is not None and isinstance(cls, type):
-        return cls()
-    else:
-        raise ValueError(f"Class {class_name} not found or is not a type.")
+def create_instances(dictClass):
+    """
+    创建所有人物实例
+    :param dictClass: 所有人物类字典
+    :return: 返回所有人物实例字典
+    """
+    dictCharacters = {}
+    for name, cls in dictClass.items():
+        dictCharacters[name] = cls()
+
+    return dictCharacters
 
 
-chara_dict = {}
-for filename in os.listdir(chara_dict_path):
-    chara_dict[filename[:-5]] = create_instance_by_name(filename[:-5])
-
-chara_list = []
-for filename in os.listdir(chara_list_path):
-    chara_list.append(filename[:-4])
+dictCharaClasses = create_classes_with_metaclass(listChara)  # 创建所有人物类字典
+dictCharas = create_instances(dictCharaClasses)  # 创建所有人物实例字典

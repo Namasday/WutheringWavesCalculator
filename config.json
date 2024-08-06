@@ -1,12 +1,15 @@
 {
-    "hezhouChara_1": "JINHSI",
-    "hezhouChara_2": "YINLIN",
+    "hezhouChara_1": "ENCORE",
+    "hezhouChara_2": "SANHUA",
     "hezhouChara_3": "VERINA",
     "strategy": [
-        "c3,r,e,0.5,q,s,0.3,a,0.3,a,0.5,a",
-        "c1,q,0.4,e,1.34,e,0.5,r,a^3,e",
-        "c2,e,1,e,1,q,1,q,1,r,A~0.5,0.7,A~0.5,0.7,A~0.5",
-        "c1,e,a^1",
-        "c2"
+        "c3,r,e,0.5,s,0.3,a,0.3,a,0.5,a",
+        "c2,a^1.23,A-,0.6,r,A+,0.6,e",
+        "c1,e,0.2",
+        "c3,a^1,q",
+        "c1,e,0.9,q,a^1.67",
+        "c2,a^1.23,A~0.9,0.6,e,q",
+        "c1,r,e,a^3.12,sh,a^0.85,e,a^3.12,sh,a^0.85,e,0.7,rA~0.5",
+        "c2,a^1.23,A~0.9,0.6,e"
     ]
 }

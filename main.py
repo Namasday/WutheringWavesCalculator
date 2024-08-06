@@ -13,7 +13,7 @@ from modules.constant import Setting
 from modules.control import KeyListener
 import re
 
-from data.characters import chara_dict, chara_list
+from data.characters import dictChara, chara_list
 import rcc_resources
 
 import warnings
@@ -28,7 +28,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.initUI()
 
-        self.chara = chara_dict['Jinhsi']
+        self.chara = dictChara['Jinhsi']
         self.set_data(self.chara)
 
         # 初始化合轴人物按钮属性

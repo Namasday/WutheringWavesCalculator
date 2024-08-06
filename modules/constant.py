@@ -2,7 +2,7 @@ import win32gui
 import json
 
 
-with open("../config.json", "r") as f:
+with open("config.json", "r") as f:
     config = json.load(f)
 
 
@@ -41,70 +41,64 @@ class Setting:
     }
 
     # 颜色范围
-    colorRange = {
-        # 热熔
-        "xiezouReRong": [
+    crXieZou = {
+        "ReRong": [
             [205, 107, 77],
             [220, 122, 92]
         ],
-        "specialReRong": [
-            [235, 89, 37],
-            [255, 114, 62]
-        ],
-
-        # 冷凝
-        "xiezouLengNing": [
+        "LengNing": [
             [63, 154, 217],
             [78, 169, 232]
         ],
-        "specialLengNing": [
-            [61, 191, 235],
-            [86, 216, 255]
-        ],
-
-        # 气动
-        "xiezouQiDong": [
+        "QiDong": [
             [74, 215, 156],
             [94, 235, 176]
         ],
-        "specialQiDong": [
-            [73, 230, 175],
-            [103, 255, 205]
-        ],
-
-        # 导电
-        "xiezouDaoDian": [
+        "DaoDian": [
             [156, 100, 222],
             [171, 115, 237]
         ],
-        "specialDaoDian": [
-            [203, 127, 220],
-            [238, 162, 255]
-        ],
-
-        # 衍射
-        "xiezouYanShe": [
+        "YanShe": [
             [214, 195, 100],
             [234, 215, 120]
         ],
-        "specialYanShe": [
-            [235, 231, 104],
-            [255, 255, 134]
-        ],
-        "specialJINHSI": [  # 今汐
-            [235, 222, 154],
-            [255, 242, 174]
-        ],
-
-        # 湮灭
-        "xiezouYanMie": [
+        "YanMie": [
             [199, 73, 149],
             [214, 88, 164]
         ],
-        "specialYanMie": [
+    }
+
+    # 颜色范围
+    crSpecial = {
+        "ReRong": [
+            [235, 89, 37],
+            [255, 114, 62]
+        ],
+        "LengNing": [
+            [61, 191, 235],
+            [86, 216, 255]
+        ],
+        "QiDong": [
+            [73, 230, 175],
+            [103, 255, 205]
+        ],
+        "DaoDian": [
+            [203, 127, 220],
+            [238, 162, 255]
+        ],
+        "YanShe": [
+            [235, 231, 104],
+            [255, 255, 134]
+        ],
+        "YanMie": [
             [215, 44, 95],
             [255, 84, 135]
-        ]
+        ],
+
+        "JINHSI": [  # 今汐
+            [235, 222, 154],
+            [255, 242, 174]
+        ],
     }
 
     # 人物按钮预设

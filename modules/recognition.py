@@ -18,16 +18,16 @@ def crop_roi(npimage, roi):
     npimage = npimage[y0:y1, x0:x1, :]
     return npimage
 
-def binarize_image_by_color(npimage, attribute):
+def binarize_image_by_color(npimage, colorRange: list):
     """
     以特定颜色范围对图像进行二值化处理。
     ：param npimage: numpy图像数组
     ：param attribute: 人物属性
     """
-    # 读取图像
     img = npimage
-    lower_bound = Setting.colorRange[attribute][0]
-    upper_bound = Setting.colorRange[attribute][1]
+    # 获取阈值颜色上下界限
+    lower_bound = colorRange[0]
+    upper_bound = colorRange[1]
 
     # 创建一个掩码，用于标记在指定颜色范围内的像素
     mask = cv2.inRange(img, np.array(lower_bound, dtype=np.uint8), np.array(upper_bound, dtype=np.uint8))
@@ -140,7 +140,8 @@ class Recognition:
         """
         gameScreenshot = screenshot()  # 截图
         imageXieZou = crop_roi(gameScreenshot, "XieZou")  # 截取协奏能量区域
-        imageXieZou = binarize_image_by_color(imageXieZou, "xiezou" + attribute)  # 二值化图像
+        cr = Setting.crXieZou[attribute]  # 获取颜色范围
+        imageXieZou = binarize_image_by_color(imageXieZou, cr)  # 二值化图像
 
         centerX = int(imageXieZou.shape[0] / 2)  # 计算圆心x坐标
         centerY = int(imageXieZou.shape[1] / 2)  # 计算圆心y坐标
@@ -171,13 +172,25 @@ class Recognition:
         """
         gameScreenshot = screenshot()  # 截图
         imageSpecial = crop_roi(gameScreenshot, "Special")  # 截取特殊能量区域
-        imageSpecial = binarize_image_by_color(imageSpecial, "special" + attribute)  # 二值化图像
+        cr = Setting.crSpecial[attribute]  # 获取颜色范围
+        imageSpecial = binarize_image_by_color(imageSpecial, cr)  # 二值化图像
 
         # 计数
         contours, _ = cv2.findContours(imageSpecial, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # 查找像素块
         count = len(contours)
         percent = count / Setting.totalSpecial["Default"]
         return percent
+
+    def attribute(self) -> str:
+        """
+        检测当前人物属性
+        """
+        gameScreenshot = screenshot()  # 截图
+        imageXieZou = crop_roi(gameScreenshot, "XieZou")  # 截取协奏能量区域
+        for attr, cr in Setting.crXieZou:
+            imageXieZou = binarize_image_by_color(imageXieZou, cr)  # 二值化图像
+            if 255 in imageXieZou:
+                return attr
 
 
 recognition = Recognition()

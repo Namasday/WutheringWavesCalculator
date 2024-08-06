@@ -83,6 +83,10 @@ class KeyListener:
         self.startKey = Key.f5
         self.running = threading.Event()
         self.stopListening = stopListening
+        self.cdBianzou = {"c1": 1,
+                          "c2": 1,
+                          "c3": 1}
+        self.attribute = None  # 当前人物属性
 
     def battle(self):
         """
@@ -96,115 +100,144 @@ class KeyListener:
 
         global control
         control = Control(Setting.hwnd)  # 控制
+
+        from main import window
+        listCharaName = [
+            "",
+            window.btnChara_1.property("text"),
+            window.btnChara_2.property("text"),
+            window.btnChara_3.property("text"),
+        ]
+        listCharaAttr = [
+            ""
+
+        ]
+
         tactic = re.split(r'[,\n]', self.strategy)  # 策略转化为列表
 
-        # 初始化人物变奏技能时间
-        cdBianzou = {"c1": 1,
-                     "c2": 1,
-                     "c3": 1}
-        now = None  # 当前时间
-
         while True:
-            for oper in tactic:
-                if not self.running.is_set():  # 判断是否停止监听
-                    return
+            if not self.running.is_set():  # 判断是否停止动作
+                return
 
-                try:  # 如果是数字，等待时间
-                    wait_time = float(oper)
-                    time.sleep(wait_time)
-                    continue
+            self.loop_battle(tactic)
 
-                finally:
-                    if len(oper) == 1:
-                        if oper == "a":  # 普攻
-                            control.click()
+    def check_oper(self, oper):
+        """
+        检查操作符
+        :param oper: 操作符
+        """
+        try:  # 如果是数字，等待时间
+            wait_time = float(oper)
+            time.sleep(wait_time)
+            return
 
-                        elif oper == "s":  # 跳跃
-                            control.space()
+        except:
+            if len(oper) == 1:
+                if oper == "a":  # 普攻
+                    control.click()
 
-                        elif oper == "r":  # 共鸣解放
-                            confirm_r()
+                elif oper == "s":  # 跳跃
+                    control.space()
 
+                elif oper == "r":  # 共鸣解放
+                    confirm_r()
+
+                else:
+                    control.tap(oper)
+
+            elif len(oper) == 2:
+                if oper in ["c1", "c2", "c3"]:  # 切换人物
+                    control.tap(oper[1])
+                    if self.cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
+                        now = time.time()  # 变奏计时开始
+
+                    while True:  # 等待变奏结束
+                        reco = recognition.bianzou()
+                        if reco == 0:  # 变奏检测无效
+                            time.sleep(self.cdBianzou[oper])
+                            break
+                        elif reco == 1:  # 变奏结束
+                            if self.cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
+                                self.cdBianzou[oper] = time.time() - now  # 变奏计时结束
+                            break
                         else:
-                            control.tap(oper)
+                            continue
 
-                    elif len(oper) == 2:
-                        if oper in ["c1", "c2", "c3"]:  # 切换人物
-                            control.tap(oper[1])
-                            if cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
-                                now = time.time()  # 变奏计时开始
+                elif oper == "A-":  # 重击按下
+                    control.click_press()
 
-                            while True:  # 等待变奏结束
-                                reco = recognition.bianzou()
-                                if reco == 0:  # 变奏检测无效
-                                    time.sleep(cdBianzou[oper])
-                                    break
-                                elif reco == 1:  # 变奏结束
-                                    if cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
-                                        cdBianzou[oper] = time.time() - now  # 变奏计时结束
-                                    break
-                                else:
-                                    continue
+                elif oper == "A+":  # 重击释放
+                    control.click_release()
 
-                        elif oper == "A-":  # 重击按下
-                            control.click_press()
+                elif oper in ["ra", "sa"]:  # 大招状态下普攻或空中攻击
+                    control.click()
 
-                        elif oper == "A+":  # 重击释放
-                            control.click_release()
+                elif oper == "sh":  # 闪避
+                    control.mouse_right()
 
-                        elif oper in ["ra", "sa"]:  # 大招状态下普攻或空中攻击
-                            control.click()
+            elif len(oper) > 2:
+                if "A~" in oper or "rA~" in oper:  # 重击或大招状态下重击
+                    listOper = oper.split("~")
+                    click_time = float(listOper[1])
+                    control.click(click_time)
 
-                        elif oper == "sh":  # 闪避
-                            control.mouse_right()
+                elif "a^" in oper:  # 测轴用，连按时间
+                    listOper = oper.split("^")
+                    click_long = float(listOper[1])
+                    now = time.time()
+                    while time.time() - now < click_long:
+                        control.click()
+                        time.sleep(0.05)
 
-                    elif len(oper) > 2:
-                        if "A~" in oper or "rA~" in oper:  # 重击或大招状态下重击
-                            listOper = oper.split("~")
-                            click_time = float(listOper[1])
-                            control.click(click_time)
+                elif "eXZ" in oper:  # 循环至协奏能量达标
+                    listOper = oper.split(">eXZ")
+                    tacticInside = listOper[0]  # 循环操作策略
+                    energyGoal = float(listOper[1])  # 目标协奏能量百分比
+                    tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
+                    tacticInside = tacticInside.split(".")  # 拆分操作策略
 
-                        elif "a^" in oper:  # 测轴用，连按时间
-                            listOper = oper.split("^")
-                            click_long = float(listOper[1])
-                            now = time.time()
-                            while time.time() - now < click_long:
-                                control.click()
-                                time.sleep(0.05)
+                    self.loop_battle_inside(tacticInside, energyGoal, "xiezou")
 
-                        elif "eXZ" in oper:  # 循环至协奏能量达标
-                            if ">" in oper:
-                                listOper = oper.split(">eXZ")
-                                tacticInside = listOper[0]  # 循环操作策略
-                                energyGoal = float(listOper[1])  # 目标协奏能量百分比
-                                tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
-                                tacticInside = tacticInside.split(".")  # 拆分操作策略
+                elif "eSP" in oper:
+                    listOper = oper.split(">eSP")
+                    tacticInside = listOper[0]  # 循环操作策略
+                    energyGoal = float(listOper[1])  # 目标协奏能量百分比
+                    tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
+                    tacticInside = tacticInside.split(".")  # 拆分操作策略
 
-                                for operInside in tacticInside:
-                                    if not self.running.is_set():  # 判断是否停止监听
-                                        return
+                    self.loop_battle_inside(tacticInside, energyGoal, "special")
 
-                                    if recognition.energy_xiezou() >= energyGoal:  # 检测协奏能量是否达标
-                                        break
+    def loop_battle_inside(self, strategy: list, energy: float, goal: str):
+        """
+        战斗策略的枚举循环
+        ：param strategy: 策略列表
+        ：param energy: 目标协奏能量百分比
+        ：param goal: 目标能量类型，[xiezou, special]
+        """
+        reco_dic = {
+            "xiezou": recognition.energy_xiezou,
+            "special": recognition.energy_special,
+        }
 
-                                    control.tap(operInside)
+        for oper in strategy:
+            if not self.running.is_set():  # 判断是否停止动作
+                return
 
-                            if "<" in oper:
-                                listOper = oper.split("<")
-                                tacticInside = listOper[-1]  # 循环操作策略
-                                energyGoal = float(listOper[0].split("eXZ")[-1])  # 目标协奏能量百分比
-                                tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
-                                tacticInside = tacticInside.split(".")  # 拆分操作策略
+            if reco_dic[goal]() >= energy:  # 检测目标能量是否达标
+                return
 
-                                for operInside in tacticInside:
-                                    if not self.running.is_set():  # 判断是否停止监听
-                                        return
+            self.check_oper(oper)
 
-                                    if recognition.energy_xiezou() >= energyGoal:  # 检测协奏能量是否达标
-                                        break
+    def loop_battle(self, strategy: list):
+        """
+        战斗策略的枚举循环
+        ：param strategy: 策略列表
+        """
+        for oper in strategy:
+            if not self.running.is_set():  # 判断是否停止动作
+                return
 
-                                    control.tap(operInside)
-
+            self.check_oper(oper)
 
     def on_press(self, key):
         """
