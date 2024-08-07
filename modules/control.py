@@ -103,6 +103,7 @@ class KeyListener:
         global control
         control = Control(Setting.hwnd)  # 控制
         tactic = re.split(r'[,\n]', self.strategy)  # 策略转化为列表
+        self.numChara = recognition.chara_rank()
 
         while True:
             if not self.running.is_set():  # 判断是否停止动作
@@ -115,16 +116,26 @@ class KeyListener:
         确保释放了共鸣解放
         """
         if recognition.ending() == 1:  # 如果可以释放共鸣解放
-            while True:
+            while recognition.ending() != 0:
                 control.tap("r")  # 狂按r释放共鸣解放
-                if recognition.ending() == 0:  # 检测到共鸣解放cd中
-                    return
+
+
+    def confirm_c(self, num):
+        """
+        确保切换了人物
+        :param num: 人物序号
+        """
+        while recognition.chara_rank() == self.numChara:
+            control.tap(num)
 
     def check_oper(self, oper):
         """
         检查操作符
         :param oper: 操作符
         """
+        if recognition.chara_rank() != self.numChara:  # 如果策略人物序号与当前人物不一致，则切换人物
+            control.tap(str(self.numChara))
+
         try:  # 如果是数字，等待时间
             wait_time = float(oper)
             time.sleep(wait_time)
@@ -146,9 +157,9 @@ class KeyListener:
 
             elif len(oper) == 2:
                 if oper in ["c1", "c2", "c3"]:  # 切换人物
-                    charaNameBefore = self.listCharaName[self.numChara]  # 当前角色名
-                    recognition.energy_xiezou()
-                    control.tap(oper[1])
+                    recoEnergyXieZou = recognition.energy_xiezou(self.listCharaName[self.numChara])
+                    self.confirm_c(oper[1])
+
                     if self.cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
                         now = time.time()  # 变奏计时开始
 
@@ -156,8 +167,9 @@ class KeyListener:
 
                     while True:  # 等待变奏结束
                         reco = recognition.bianzou()
-                        if reco == 0:  # 变奏检测无效
-                            time.sleep(self.cdBianzou[oper])
+                        if reco == 0:  # 检测到双数字
+                            if recoEnergyXieZou == 1:
+                                time.sleep(self.cdBianzou[oper])
                             break
                         elif reco == 1:  # 变奏结束
                             if self.cdBianzou[oper] != 1:  # 如果变奏技能时间不为1，则计算变奏时间
@@ -179,18 +191,15 @@ class KeyListener:
                     control.mouse_right()
 
             elif len(oper) > 2:
-                if "A~" in oper or "rA~" in oper:  # 重击或大招状态下重击
-                    listOper = oper.split("~")
-                    click_time = float(listOper[1])
-                    control.click(click_time)
+                if "eSP" in oper:
+                    listOper = oper.split(">eSP")
+                    tacticInside = listOper[0]  # 循环操作策略
+                    energyGoal = float(listOper[1])  # 目标协奏能量百分比
+                    tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
+                    tacticInside = tacticInside.split(";")  # 拆分操作策略
 
-                elif "a^" in oper:  # 测轴用，连按时间
-                    listOper = oper.split("^")
-                    click_long = float(listOper[1])
-                    now = time.time()
-                    while time.time() - now < click_long:
-                        control.click()
-                        time.sleep(0.05)
+                    charaNameNow = self.listCharaName[self.numChara]  # 当前角色名
+                    self.loop_battle_inside(tacticInside, energyGoal, "special", charaNameNow)
 
                 elif "eXZ" in oper:  # 循环至协奏能量达标
                     listOper = oper.split(">eXZ")
@@ -202,15 +211,18 @@ class KeyListener:
                     charaNameNow = self.listCharaName[self.numChara]  # 当前角色名
                     self.loop_battle_inside(tacticInside, energyGoal, "xiezou", charaNameNow)
 
-                elif "eSP" in oper:
-                    listOper = oper.split(">eSP")
-                    tacticInside = listOper[0]  # 循环操作策略
-                    energyGoal = float(listOper[1])  # 目标协奏能量百分比
-                    tacticInside = tacticInside.replace("(", "").replace(")", "")  # 去除括号
-                    tacticInside = tacticInside.split(";")  # 拆分操作策略
+                elif "A~" in oper or "rA~" in oper:  # 重击或大招状态下重击
+                    listOper = oper.split("~")
+                    click_time = float(listOper[1])
+                    control.click(click_time)
 
-                    charaNameNow = self.listCharaName[self.numChara]  # 当前角色名
-                    self.loop_battle_inside(tacticInside, energyGoal, "special", charaNameNow)
+                elif "a^" in oper:  # 测轴用，连按时间
+                    listOper = oper.split("^")
+                    click_long = float(listOper[1])
+                    now = time.time()
+                    while time.time() - now < click_long:
+                        control.click()
+                        time.sleep(0.05)
 
     def loop_battle_inside(self, strategy: list, energygoal: float, energytype: str, charaName: str):
         """
